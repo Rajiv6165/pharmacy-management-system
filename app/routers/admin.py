@@ -1,11 +1,12 @@
 from datetime import datetime, date, time
 from decimal import Decimal
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Staff, Order
-from app.auth.security import get_current_admin, hash_password
+from app.auth.security import get_current_admin, hash_password, get_current_staff
 from app.schemas.auth import StaffResponse
 from app.schemas.staff import StaffCreate, StaffUpdate, DashboardSummaryResponse
 
@@ -70,9 +71,16 @@ def edit_staff_account(
     db.refresh(staff_member)
     return staff_member
 
+@router.get("/staff", response_model=List[StaffResponse])
+def list_staff_accounts(
+    admin: Staff = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    return db.query(Staff).order_by(Staff.id).all()
+
 @router.get("/dashboard/summary", response_model=DashboardSummaryResponse)
 def get_dashboard_summary(
-    admin: Staff = Depends(get_current_admin),
+    staff: Staff = Depends(get_current_staff),
     db: Session = Depends(get_db)
 ):
     # Calculate today's start

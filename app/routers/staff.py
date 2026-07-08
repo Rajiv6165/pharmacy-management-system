@@ -190,6 +190,20 @@ def edit_product(
     db.refresh(product)
     return product
 
+@router.get("/products/{id}", response_model=ProductResponse)
+def get_product_details_for_staff(
+    id: int,
+    staff: Staff = Depends(get_current_staff),
+    db: Session = Depends(get_db)
+):
+    product = db.query(Product).filter(Product.id == id).first()
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
+    return product
+
 @router.post("/products/{id}/restock", response_model=ProductResponse)
 def restock_product(
     id: int,
