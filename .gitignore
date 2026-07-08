@@ -1,16 +1,84 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django/Flask/Scrapy/Sphinx/PyBuilder
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+instance/
+.webassets-cache
+.scrapy
+docs/_build/
+.pybuilder/
+target/
+
+# Jupyter Notebook & IPython
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
 # Environments and credentials
 .env
 *.env
 .venv/
 venv/
 env/
-
-# Python caching & bytecode
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.pytest_cache/
+ENV/
+env.bak/
+venv.bak/
 
 # Uploaded media files (prescriptions)
 uploads/
@@ -24,3 +92,24 @@ uploads/
 # OS files
 Thumbs.db
 Desktop.ini
+
+# mypy & typing
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre & pytype
+.pyre/
+.pytype/
+
+# Ruff
+.ruff_cache/
+
+# PyPI configuration file
+.pypirc
+
+# Streamlit/Marimo
+.streamlit/secrets.toml
+marimo/_static/
+marimo/_lsp/
+__marimo__/
