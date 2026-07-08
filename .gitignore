@@ -1,0 +1,26 @@
+# Environments and credentials
+.env
+*.env
+.venv/
+venv/
+env/
+
+# Python caching & bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Uploaded media files (prescriptions)
+uploads/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+Desktop.ini
