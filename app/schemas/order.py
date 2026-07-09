@@ -17,7 +17,7 @@ class OrderItemResponse(BaseModel):
     id: int
     product_id: int
     quantity: int
-    price_at_order: Decimal
+    price_at_order: float
     product_name: Optional[str] = None
 
     class Config:

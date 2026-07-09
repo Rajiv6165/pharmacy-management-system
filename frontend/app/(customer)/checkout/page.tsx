@@ -394,7 +394,7 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                     <span className="font-extrabold text-slate-300">
-                      ₹{(item.product.price * item.quantity).toFixed(2)}
+                      ₹{(Number(item.product.price) * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -408,7 +408,7 @@ export default function CheckoutPage() {
                     Total Pay
                   </span>
                   <span className="text-2xl font-black text-teal-400">
-                    ₹{cartTotal.toFixed(2)}
+                    ₹{Number(cartTotal).toFixed(2)}
                   </span>
                 </div>
               </div>

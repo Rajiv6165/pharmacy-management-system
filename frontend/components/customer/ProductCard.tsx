@@ -13,8 +13,8 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart, cartItems } = useCart();
   
-  const discount = product.mrp > product.price 
-    ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
+  const discount = Number(product.mrp) > Number(product.price) 
+    ? Math.round(((Number(product.mrp) - Number(product.price)) / Number(product.mrp)) * 100)
     : 0;
 
   const cartItem = cartItems.find(item => item.product.id === product.id);
@@ -91,11 +91,11 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="p-5 pt-0 border-t border-slate-900/50 mt-auto flex items-center justify-between">
         <div className="flex flex-col">
           <span className="text-lg font-extrabold text-white">
-            ₹{product.price.toFixed(2)}
+            ₹{Number(product.price).toFixed(2)}
           </span>
-          {product.mrp > product.price && (
+          {Number(product.mrp) > Number(product.price) && (
             <span className="text-xs text-slate-500 line-through">
-              M.R.P. ₹{product.mrp.toFixed(2)}
+              M.R.P. ₹{Number(product.mrp).toFixed(2)}
             </span>
           )}
         </div>

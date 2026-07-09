@@ -17,8 +17,8 @@ class ProductResponse(BaseModel):
     brand: Optional[str] = None
     category_id: Optional[int] = None
     description: Optional[str] = None
-    price: Decimal
-    mrp: Optional[Decimal] = None
+    price: float
+    mrp: Optional[float] = None
     stock_qty: int
     unit: Optional[str] = None
     requires_rx: bool

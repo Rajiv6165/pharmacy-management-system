@@ -287,7 +287,7 @@ export default function StaffOrderDetailPage() {
                             {item.product_name}
                           </span>
                           <span className="text-xs text-slate-500">
-                            Unit Price: ₹{item.price_at_order.toFixed(2)}
+                            Unit Price: ₹{Number(item.price_at_order).toFixed(2)}
                           </span>
                         </div>
                         <div className="flex gap-10 items-center">
@@ -295,7 +295,7 @@ export default function StaffOrderDetailPage() {
                             Qty: {item.quantity}
                           </span>
                           <span className="text-sm font-extrabold text-slate-200">
-                            ₹{(item.price_at_order * item.quantity).toFixed(2)}
+                            ₹{(Number(item.price_at_order) * item.quantity).toFixed(2)}
                           </span>
                         </div>
                       </div>

@@ -227,7 +227,7 @@ export default function StaffInventoryPage() {
                       {prod.name}
                     </Link>
                     <p className="text-xs text-slate-450 leading-relaxed font-medium">
-                      Unit Packaging: {prod.unit} · Sell Price: ₹{prod.price.toFixed(2)} · MRP: ₹{prod.mrp.toFixed(2)}
+                      Unit Packaging: {prod.unit} · Sell Price: ₹{Number(prod.price).toFixed(2)} · MRP: ₹{Number(prod.mrp).toFixed(2)}
                     </p>
                   </div>
 

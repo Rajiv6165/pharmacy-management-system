@@ -83,7 +83,7 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
             className="w-full flex items-center justify-center gap-2 py-4 px-6 border border-transparent rounded-2xl text-sm font-extrabold text-slate-950 bg-teal-400 hover:bg-teal-300 transition-all duration-300 shadow-lg shadow-teal-500/20 cursor-pointer"
           >
             <ShoppingCart className="h-5 w-5" />
-            Add to Cart (₹{(product.price * quantity).toFixed(2)})
+            Add to Cart (₹{(Number(product.price) * quantity).toFixed(2)})
           </button>
         </div>
       )}

@@ -60,8 +60,8 @@ export default function CartPage() {
               {cartItems.map((item) => {
                 const maxStock = item.product.stock_qty;
                 const isMaxReached = item.quantity >= maxStock;
-                const discount = item.product.mrp > item.product.price 
-                  ? Math.round(((item.product.mrp - item.product.price) / item.product.mrp) * 100)
+                const discount = Number(item.product.mrp) > Number(item.product.price) 
+                  ? Math.round(((Number(item.product.mrp) - Number(item.product.price)) / Number(item.product.mrp)) * 100)
                   : 0;
 
                 return (
@@ -89,7 +89,7 @@ export default function CartPage() {
                         {item.product.name}
                       </Link>
                       <p className="text-xs text-slate-400">
-                        Unit: {item.product.unit} · ₹{item.product.price.toFixed(2)}/unit
+                        Unit: {item.product.unit} · ₹{Number(item.product.price).toFixed(2)}/unit
                       </p>
                     </div>
 
@@ -129,7 +129,7 @@ export default function CartPage() {
                     {/* Total Price */}
                     <div className="text-right min-w-[70px]">
                       <span className="font-extrabold text-white text-base block">
-                        ₹{(item.product.price * item.quantity).toFixed(2)}
+                        ₹{(Number(item.product.price) * item.quantity).toFixed(2)}
                       </span>
                       {discount > 0 && (
                         <span className="text-xxs text-teal-400 font-bold block">
@@ -161,7 +161,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-baseline">
                     <span className="text-sm text-slate-400 font-medium">Grand Total</span>
                     <span className="text-2xl font-black text-teal-400">
-                      ₹{cartTotal.toFixed(2)}
+                      ₹{Number(cartTotal).toFixed(2)}
                     </span>
                   </div>
                 </div>

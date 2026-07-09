@@ -101,17 +101,17 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-black text-white">
-                      ₹{product.price.toFixed(2)}
+                      ₹{Number(product.price).toFixed(2)}
                     </span>
-                    {product.mrp > product.price && (
+                    {Number(product.mrp) > Number(product.price) && (
                       <span className="text-sm text-slate-500 line-through">
-                        M.R.P. ₹{product.mrp.toFixed(2)}
+                        M.R.P. ₹{Number(product.mrp).toFixed(2)}
                       </span>
                     )}
                   </div>
-                  {product.mrp > product.price && (
+                  {Number(product.mrp) > Number(product.price) && (
                     <span className="text-xs text-teal-400 font-bold mt-1 block">
-                      You save ₹{(product.mrp - product.price).toFixed(2)} ({Math.round(((product.mrp - product.price) / product.mrp) * 100)}%)
+                      You save ₹{(Number(product.mrp) - Number(product.price)).toFixed(2)} ({Math.round(((Number(product.mrp) - Number(product.price)) / Number(product.mrp)) * 100)}%)
                     </span>
                   )}
                 </div>
