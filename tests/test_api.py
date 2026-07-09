@@ -1,6 +1,7 @@
 import io
 import os
 os.environ["ADMIN_BOOTSTRAP_PASSWORD"] = "Admin@123"
+os.environ["ENV"] = "testing"
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -333,3 +334,171 @@ def test_admin_dashboard_summary(client):
     assert summary["today_orders_count"] == 1
     assert float(summary["today_revenue"]) == 300.00
     assert summary["pending_rx_count"] == 0
+
+
+def test_prescription_upload_validation(client, db_session):
+    # Log in customer
+    cust_login = {"phone": "9876543210", "password": "password123"}
+    cust_token = client.post("/auth/customer/login", json=cust_login).json()["access_token"]
+    cust_headers = {"Authorization": f"Bearer {cust_token}"}
+    
+    # Get a product and address
+    address = db_session.query(Address).first()
+    product = db_session.query(Product).first()
+    
+    # Create order requiring Rx
+    order_create = {
+        "delivery_type": "delivery",
+        "address_id": address.id,
+        "payment_method": "online",
+        "items": [
+            {"product_id": product.id, "quantity": 1}
+        ]
+    }
+    response = client.post("/orders", json=order_create, headers=cust_headers)
+    order_id = response.json()["id"]
+    
+    # Test file size limit (>5MB)
+    large_content = b"a" * (5 * 1024 * 1024 + 1)
+    file = io.BytesIO(large_content)
+    response = client.post(
+        f"/orders/{order_id}/prescription",
+        files={"file": ("prescription.pdf", file, "application/pdf")},
+        headers=cust_headers
+    )
+    assert response.status_code == 400
+    assert "size" in response.json()["detail"].lower()
+    
+    # Test invalid file format
+    invalid_content = b"some text file content"
+    file = io.BytesIO(invalid_content)
+    response = client.post(
+        f"/orders/{order_id}/prescription",
+        files={"file": ("prescription.txt", file, "text/plain")},
+        headers=cust_headers
+    )
+    assert response.status_code == 400
+    assert "file type" in response.json()["detail"].lower()
+
+
+def test_razorpay_webhook_signature_verification(client):
+    from app.config import settings
+    # Save original settings
+    orig_secret = settings.RAZORPAY_WEBHOOK_SECRET
+    settings.RAZORPAY_WEBHOOK_SECRET = "test_webhook_secret_key"
+    
+    # Make a dummy request body
+    body = b'{"event":"order.paid","payload":{"payment":{"entity":{"order_id":"order_test_123","id":"pay_test_abc"}}}}'
+    
+    # Generate signature using hmac
+    import hmac
+    import hashlib
+    expected_signature = hmac.new(
+        b"test_webhook_secret_key",
+        body,
+        hashlib.sha256
+    ).hexdigest()
+    
+    # Post with valid signature
+    response = client.post(
+        "/payments/webhook",
+        content=body,
+        headers={"X-Razorpay-Signature": expected_signature}
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "ignored"
+    
+    # Post with invalid signature
+    response = client.post(
+        "/payments/webhook",
+        content=body,
+        headers={"X-Razorpay-Signature": "invalid_sig"}
+    )
+    assert response.status_code == 400
+    
+    # Restore settings
+    settings.RAZORPAY_WEBHOOK_SECRET = orig_secret
+
+
+def test_rate_limiter_in_isolation():
+    from app.utils.rate_limiter import RateLimiter
+    from fastapi import HTTPException
+    from app.config import settings
+    import pytest
+    
+    # Temporarily set environment to local so rate limiting is not bypassed
+    orig_env = settings.ENV
+    settings.ENV = "local"
+    
+    try:
+        limiter = RateLimiter(requests_limit=2, window_seconds=10)
+        
+        class DummyClient:
+            def __init__(self, host):
+                self.host = host
+                
+        class MockRequest:
+            def __init__(self, host, headers=None):
+                self.client = DummyClient(host)
+                self.headers = headers or {}
+                
+        req = MockRequest("1.1.1.1")
+        
+        # First request
+        limiter(req)
+        # Second request
+        limiter(req)
+        
+        # Third request within window should raise 429
+        with pytest.raises(HTTPException) as exc_info:
+            limiter(req)
+        assert exc_info.value.status_code == 429
+    finally:
+        settings.ENV = orig_env
+
+
+def test_mock_signature_bypass_in_production(client, db_session):
+    from app.config import settings
+    # Set environment to production
+    orig_env = settings.ENV
+    settings.ENV = "production"
+    
+    verify_data = {
+        "razorpay_order_id": "order_mock_123",
+        "razorpay_payment_id": "pay_mock_123",
+        "razorpay_signature": "mock_sig_bypass"
+    }
+    
+    # Log in customer
+    cust_login = {"phone": "9876543210", "password": "password123"}
+    cust_token = client.post("/auth/customer/login", json=cust_login).json()["access_token"]
+    cust_headers = {"Authorization": f"Bearer {cust_token}"}
+    
+    # Get address and product
+    address = db_session.query(Address).first()
+    product = db_session.query(Product).first()
+    order_create = {
+        "delivery_type": "delivery",
+        "address_id": address.id,
+        "payment_method": "online",
+        "items": [
+            {"product_id": product.id, "quantity": 1}
+        ]
+    }
+    order = client.post("/orders", json=order_create, headers=cust_headers).json()
+    order_id = order["id"]
+    
+    # Set dummy razorpay order id
+    real_order = db_session.query(Order).filter(Order.id == order_id).first()
+    real_order.razorpay_order_id = "order_rzp_prod_test"
+    db_session.commit()
+    
+    verify_data["razorpay_order_id"] = "order_rzp_prod_test"
+    
+    response = client.post("/payments/verify", json=verify_data, headers=cust_headers)
+    assert response.status_code == 400
+    assert "invalid razorpay payment signature" in response.json()["detail"].lower()
+    
+    # Restore environment
+    settings.ENV = orig_env
+

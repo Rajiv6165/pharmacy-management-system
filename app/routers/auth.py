@@ -4,10 +4,14 @@ from app.database import get_db
 from app.models import Customer, Staff
 from app.schemas.auth import CustomerRegister, CustomerLogin, StaffLogin, Token, CustomerResponse
 from app.auth.security import hash_password, verify_password, create_access_token
+from app.utils.rate_limiter import RateLimiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/customer/register", response_model=CustomerResponse, status_code=status.HTTP_201_CREATED)
+login_limiter = RateLimiter(requests_limit=5, window_seconds=60)
+register_limiter = RateLimiter(requests_limit=10, window_seconds=60)
+
+@router.post("/customer/register", response_model=CustomerResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(register_limiter)])
 def register_customer(data: CustomerRegister, db: Session = Depends(get_db)):
     # Check if phone number is registered
     existing_phone = db.query(Customer).filter(Customer.phone == data.phone).first()
@@ -39,7 +43,7 @@ def register_customer(data: CustomerRegister, db: Session = Depends(get_db)):
     db.refresh(customer)
     return customer
 
-@router.post("/customer/login", response_model=Token)
+@router.post("/customer/login", response_model=Token, dependencies=[Depends(login_limiter)])
 def login_customer(data: CustomerLogin, db: Session = Depends(get_db)):
     customer = db.query(Customer).filter(Customer.phone == data.phone).first()
     if not customer or not verify_password(data.password, customer.password_hash):
@@ -51,7 +55,7 @@ def login_customer(data: CustomerLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": str(customer.id), "type": "customer"})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/staff/login", response_model=Token)
+@router.post("/staff/login", response_model=Token, dependencies=[Depends(login_limiter)])
 def login_staff(data: StaffLogin, db: Session = Depends(get_db)):
     staff = db.query(Staff).filter(Staff.phone == data.phone).first()
     if not staff or not verify_password(data.password, staff.password_hash):

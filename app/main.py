@@ -1,8 +1,20 @@
 import os
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.config import settings
+
+# Initialize Sentry if DSN is configured
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+        environment=settings.ENV
+    )
+    print(f"Sentry SDK initialized for environment: {settings.ENV}")
+
 
 # Import routers
 from app.routers.auth import router as auth_router
@@ -56,9 +68,10 @@ app = FastAPI(
 )
 
 # Configure CORS for frontend integration
+origins = [o.strip() for o in settings.ALLOWED_ORIGINS.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

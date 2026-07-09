@@ -60,17 +60,13 @@ def create_order(
         order_items_to_create.append((product, item_in.quantity, price))
         
     # Create order object
-    # For COD, if no prescription required, we can auto-confirm.
-    # Otherwise, it stays 'pending' (if online, waiting for payment; if needs Rx, waiting for Rx upload)
-    status_val = "pending"
-    if data.payment_method == "cod" and not requires_rx_check:
-        status_val = "confirmed"
-        
+    # Initial status is pending. For COD, if no prescription required, we confirm it AFTER adding the items,
+    # which will issue an UPDATE on the orders table and correctly fire the db stock decrement trigger!
     order = Order(
         customer_id=customer.id,
         address_id=data.address_id if data.delivery_type == "delivery" else None,
         delivery_type=data.delivery_type,
-        status=status_val,
+        status="pending",
         payment_method=data.payment_method,
         payment_status="unpaid",
         total_amount=total_amount,
@@ -90,8 +86,22 @@ def create_order(
         )
         db.add(order_item)
         
+    # Flush items first to database
+    db.flush()
+    
+    # If COD and no Rx check, confirm the order now (triggers AFTER UPDATE trigger)
+    should_notify = False
+    if data.payment_method == "cod" and not requires_rx_check:
+        order.status = "confirmed"
+        should_notify = True
+        
     db.commit()
     db.refresh(order)
+
+    # Trigger SMS notification for auto-confirmed COD orders
+    if should_notify:
+        from app.utils.notifications import notify_order_status_change
+        notify_order_status_change(order, "pending", "confirmed")
     
     # Build response manually to include product_name
     response_items = []
@@ -129,16 +139,54 @@ def upload_prescription(
             detail="This order does not contain products that require a prescription"
         )
         
-    # Save the file
-    os.makedirs(os.path.join(settings.UPLOAD_DIR, "prescriptions"), exist_ok=True)
-    file_extension = os.path.splitext(file.filename)[1]
-    unique_filename = f"{uuid.uuid4()}{file_extension}"
-    filepath = os.path.join(settings.UPLOAD_DIR, "prescriptions", unique_filename)
+    # Check file size (max 5MB)
+    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+    file.file.seek(0, os.SEEK_END)
+    file_size = file.file.tell()
+    file.file.seek(0)
     
-    with open(filepath, "wb") as buffer:
-        buffer.write(file.file.read())
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File size exceeds the maximum limit of 5MB."
+        )
         
-    file_url = f"/uploads/prescriptions/{unique_filename}"
+    # Enforce file extension check
+    ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".pdf"}
+    file_extension = os.path.splitext(file.filename)[1].lower()
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file type. Only JPG, JPEG, PNG, and PDF files are allowed."
+        )
+        
+    file_content = file.file.read()
+    unique_filename = f"prescriptions/{uuid.uuid4()}{file_extension}"
+    
+    # Attempt to upload to S3 if configured
+    file_url = None
+    if settings.AWS_S3_BUCKET_NAME:
+        from app.utils.s3 import upload_file_to_s3
+        file_url = upload_file_to_s3(
+            file_content,
+            unique_filename,
+            file.content_type
+        )
+        
+    # Fallback to local storage if S3 is not configured or fails
+    if not file_url:
+        if settings.ENV in ("local", "testing"):
+            os.makedirs(os.path.join(settings.UPLOAD_DIR, "prescriptions"), exist_ok=True)
+            local_filename = f"{uuid.uuid4()}{file_extension}"
+            filepath = os.path.join(settings.UPLOAD_DIR, "prescriptions", local_filename)
+            with open(filepath, "wb") as buffer:
+                buffer.write(file_content)
+            file_url = f"/uploads/prescriptions/{local_filename}"
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Prescription upload to cloud storage failed. Fallback to local ephemeral storage is disabled in staging/production."
+            )
     
     # Create prescription record
     prescription = Prescription(
@@ -149,9 +197,14 @@ def upload_prescription(
     db.add(prescription)
     
     # Update order status to rx_pending
+    old_status = order.status
     order.status = "rx_pending"
     db.commit()
     db.refresh(prescription)
+    
+    # Trigger SMS status update
+    from app.utils.notifications import notify_order_status_change
+    notify_order_status_change(order, old_status, "rx_pending")
     return prescription
 
 @router.get("/my", response_model=List[OrderResponse])

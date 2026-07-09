@@ -60,11 +60,26 @@ def update_order_status(
             detail="Order not found"
         )
         
+    old_status = order.status
     order.status = data.status
     order.handled_by_staff_id = staff.id
     
     db.commit()
     db.refresh(order)
+    
+    # Trigger SMS status update if status changed
+    if old_status != order.status:
+        from app.utils.notifications import notify_order_status_change
+        notify_order_status_change(order, old_status, order.status)
+        
+    # Check low stock warnings if confirmed
+    if order.status == "confirmed":
+        from app.utils.notifications import send_low_stock_email
+        for item in order.items:
+            product = item.product
+            # Check if stock goes below alert threshold
+            if product.is_active and product.stock_qty <= product.low_stock_alert:
+                send_low_stock_email(product.name, product.stock_qty, product.low_stock_alert)
     
     # Build order response manually to include product_name
     items = []
@@ -102,6 +117,7 @@ def verify_prescription(
     prescription.rejection_reason = data.rejection_reason if not data.verified else None
     
     order = prescription.order
+    old_status = order.status
     if data.verified:
         # If the order is paid or COD, transition to confirmed (which triggers stock decrement via database trigger)
         if order.payment_status == "paid" or order.payment_method == "cod":
@@ -112,6 +128,22 @@ def verify_prescription(
         
     db.commit()
     db.refresh(prescription)
+    db.refresh(order)
+    
+    # Trigger SMS status update if status changed
+    if old_status != order.status:
+        from app.utils.notifications import notify_order_status_change
+        notify_order_status_change(order, old_status, order.status, rejection_reason=prescription.rejection_reason)
+        
+    # Check low stock warnings if confirmed
+    if order.status == "confirmed":
+        from app.utils.notifications import send_low_stock_email
+        for item in order.items:
+            product = item.product
+            # Check if stock goes below alert threshold
+            if product.is_active and product.stock_qty <= product.low_stock_alert:
+                send_low_stock_email(product.name, product.stock_qty, product.low_stock_alert)
+                
     return prescription
 
 # ============ INVENTORY ============
