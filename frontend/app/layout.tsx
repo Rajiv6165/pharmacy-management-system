@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import PWARegister from "@/components/PWARegister";
+import SupportChatWidget from "@/components/customer/SupportChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <CartProvider>
             <PWARegister />
             {children}
+            <SupportChatWidget />
           </CartProvider>
         </AuthProvider>
       </body>
