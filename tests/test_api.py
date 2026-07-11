@@ -502,3 +502,28 @@ def test_mock_signature_bypass_in_production(client, db_session):
     # Restore environment
     settings.ENV = orig_env
 
+
+def test_support_chat_non_medical(client):
+    chat_data = {
+        "message": "how can I track my order?",
+        "conversation_history": []
+    }
+    response = client.post("/support/chat", json=chat_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert "response" in data
+    assert "[MOCK SUPPORT BOT]" in data["response"]
+
+
+def test_support_chat_medical_deflection(client):
+    chat_data = {
+        "message": "What dosage of paracetamol is safe?",
+        "conversation_history": []
+    }
+    response = client.post("/support/chat", json=chat_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert "response" in data
+    assert "pharmacist" in data["response"]
+    assert "contact the store directly" in data["response"]
+

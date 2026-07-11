@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     RAZORPAY_SECRET: str
     ADMIN_BOOTSTRAP_PASSWORD: Optional[str] = None
 
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-2.5-flash"
+
     # Phase 3: Deployment & Production Readiness settings
     ENV: str = "production"  # local | staging | production
     ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
