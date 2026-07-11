@@ -1,4 +1,4 @@
-const CACHE_NAME = "aetherrx-cache-v1";
+const CACHE_NAME = "pharmacy-cache-v1";
 const OFFLINE_URL = "/offline.html";
 
 // Assets to precache

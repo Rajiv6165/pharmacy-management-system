@@ -38,7 +38,7 @@ export default function StaffNavigation() {
           <div className="flex items-center gap-3">
             <Link href="/staff/dashboard" className="flex items-center gap-2 text-violet-400 font-extrabold text-lg tracking-wider">
               <ShieldAlert className="h-5.5 w-5.5 text-violet-400" />
-              <span>AetherRx Ops</span>
+              <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Ops</span>
             </Link>
             <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-lg text-xxs font-bold text-slate-400 bg-slate-800 uppercase tracking-widest border border-slate-700">
               {user?.role || 'Staff'}

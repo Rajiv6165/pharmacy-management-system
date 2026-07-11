@@ -43,7 +43,7 @@ export default function StaffLoginPage() {
             <ShieldCheck className="h-8 w-8" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Staff Portal
+            {process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Staff Portal
           </h2>
           <p className="mt-2 text-sm text-slate-400 font-medium">
             Pharmacy Management & Prescription Verification

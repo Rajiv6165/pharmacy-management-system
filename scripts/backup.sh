@@ -1,5 +1,5 @@
 #!/bin/bash
-# AetherRx Database Backup Script
+# Pharmacy Database Backup Script
 set -e
 
 # Make sure DATABASE_URL is set (from environment)
@@ -14,7 +14,7 @@ mkdir -p "$BACKUP_DIR"
 
 # Generate backup filename using current timestamp
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_FILE="$BACKUP_DIR/aetherrx_db_backup_$TIMESTAMP.sql"
+BACKUP_FILE="$BACKUP_DIR/pharmacy_db_backup_$TIMESTAMP.sql"
 
 echo "Starting database backup at $(date)..."
 pg_dump "$DATABASE_URL" > "$BACKUP_FILE"
@@ -25,5 +25,5 @@ echo "Database backup completed successfully: $BACKUP_FILE.gz"
 
 # Keep only the last 7 days of backups to avoid exhausting disk space
 echo "Cleaning up backups older than 7 days..."
-find "$BACKUP_DIR" -type f -name "aetherrx_db_backup_*.sql.gz" -mtime +7 -delete
+find "$BACKUP_DIR" -type f -name "pharmacy_db_backup_*.sql.gz" -mtime +7 -delete
 echo "Cleanup done."

@@ -20,13 +20,13 @@ def send_low_stock_email(product_name: str, current_stock: int, threshold: int):
 
     msg = MIMEText(
         f"Hello Staff,\n\n"
-        f"This is an automated stock alert from the AetherRx Pharmacy Management System.\n\n"
+        f"This is an automated stock alert from the {settings.BRAND_NAME} Pharmacy Management System.\n\n"
         f"The product '{product_name}' has run low on stock.\n"
         f"  - Current Stock: {current_stock}\n"
         f"  - Threshold Limit: {threshold}\n\n"
         f"Please restock this product as soon as possible to prevent order delays.\n\n"
         f"Best regards,\n"
-        f"AetherRx System"
+        f"{settings.BRAND_NAME} System"
     )
     msg["Subject"] = f"ALERT: Low Stock Warning for {product_name}"
     msg["From"] = settings.SMTP_FROM_EMAIL or settings.SMTP_USERNAME
@@ -94,21 +94,21 @@ def notify_order_status_change(order, old_status: str, new_status: str, rejectio
     message = None
     if new_status == "confirmed":
         message = (
-            f"Your AetherRx order #{order_id} has been confirmed! Total: Rs. {amount:.2f}. "
+            f"Your {settings.BRAND_NAME} order #{order_id} has been confirmed! Total: Rs. {amount:.2f}. "
             f"We are preparing it for {delivery_type}."
         )
     elif new_status == "cancelled":
         reason_str = f" Reason: {rejection_reason}." if rejection_reason else ""
         message = (
-            f"Your AetherRx order #{order_id} has been cancelled.{reason_str} "
+            f"Your {settings.BRAND_NAME} order #{order_id} has been cancelled.{reason_str} "
             f"If paid online, a refund will be processed shortly."
         )
     elif new_status == "out_for_delivery":
-        message = f"Your AetherRx order #{order_id} is out for delivery! It will reach you shortly."
+        message = f"Your {settings.BRAND_NAME} order #{order_id} is out for delivery! It will reach you shortly."
     elif new_status == "ready":
-        message = f"Your AetherRx order #{order_id} is ready for pickup! Please visit our store."
+        message = f"Your {settings.BRAND_NAME} order #{order_id} is ready for pickup! Please visit our store."
     elif new_status == "completed":
-        message = f"Your AetherRx order #{order_id} has been delivered successfully. Thank you for choosing AetherRx!"
+        message = f"Your {settings.BRAND_NAME} order #{order_id} has been delivered successfully. Thank you for choosing {settings.BRAND_NAME}!"
 
     if message:
         send_sms_notification(phone, message)

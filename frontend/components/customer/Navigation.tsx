@@ -34,7 +34,7 @@ export default function CustomerNavigation() {
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex items-center gap-2 text-teal-400 font-extrabold text-xl tracking-wider">
               <Activity className="h-6 w-6 text-teal-400" />
-              <span>AetherRx</span>
+              <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'}</span>
             </Link>
           </div>
 

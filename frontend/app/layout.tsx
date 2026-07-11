@@ -15,9 +15,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || "Pharmacy";
+
 export const metadata: Metadata = {
-  title: "AetherRx - Smart Pharmacy Management",
-  description: "Phase 2 Next.js App for Pharmacy and Prescription Operations",
+  title: `${brandName} - Smart Pharmacy Management`,
+  description: `Phase 2 Next.js App for ${brandName} and Prescription Operations`,
   manifest: "/manifest.json",
 };
 

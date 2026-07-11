@@ -61,7 +61,7 @@ export default function OrderDetailPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: paymentOrder.amount * 100, // in paisa
         currency: paymentOrder.currency,
-        name: 'AetherRx Pharmacy',
+        name: `${process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Pharmacy`,
         description: `Order Payment for #${order.id}`,
         order_id: paymentOrder.razorpay_order_id,
         handler: async function (response: any) {

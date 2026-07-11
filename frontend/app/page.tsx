@@ -9,6 +9,7 @@ import { Shield, Sparkles, Truck, ClipboardList, Activity } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function Homepage() {
+  const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy';
   let categories: Category[] = [];
   let products: Product[] = [];
   let isBackendOffline = false;
@@ -57,7 +58,7 @@ export default async function Homepage() {
             Order Medicines and Track <span className="text-teal-400">Prescriptions</span> Safely
           </h1>
           <p className="max-w-2xl mx-auto text-lg text-slate-400">
-            Welcome to AetherRx. We bridge the gap between healthcare convenience and safety, facilitating quick order fulfillment, prescription validation, and real-time status updates.
+            Welcome to {brandName}. We bridge the gap between healthcare convenience and safety, facilitating quick order fulfillment, prescription validation, and real-time status updates.
           </p>
           <div className="flex items-center justify-center gap-4 pt-4">
             <Link
@@ -148,7 +149,7 @@ export default async function Homepage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-teal-400" />
-            <span className="font-extrabold text-white">AetherRx</span>
+            <span className="font-extrabold text-white">{brandName}</span>
             <span>© 2026. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6">

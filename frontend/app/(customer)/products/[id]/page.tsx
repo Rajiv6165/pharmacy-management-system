@@ -146,7 +146,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               <div className="flex gap-3 p-4 bg-slate-950/20 border border-slate-900 rounded-2xl">
                 <ShieldCheck className="h-6 w-6 text-teal-400 flex-shrink-0" />
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-white">AetherRx Quality Assurance</h4>
+                  <h4 className="text-xs font-bold text-white">{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Quality Assurance</h4>
                   <p className="text-xxs text-slate-500 leading-normal">
                     This item is sourced from licensed manufacturers and kept under monitored temperatures. Manual review is conducted on every prescription item.
                   </p>
@@ -161,7 +161,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       <footer className="border-t border-slate-900 bg-slate-950 py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-600 flex items-center justify-center gap-2">
           <Activity className="h-4 w-4 text-teal-400/50" />
-          <span>AetherRx Pharmacy Catalogue · 2026</span>
+          <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Pharmacy Catalogue · 2026</span>
         </div>
       </footer>
     </div>
