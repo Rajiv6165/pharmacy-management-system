@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { ShieldAlert, LayoutDashboard, ClipboardList, Database, Users, LogOut, Menu, X, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, LayoutDashboard, ClipboardList, Database, Users, LogOut, Menu, X, ArrowLeft, Tag } from 'lucide-react';
 
 export default function StaffNavigation() {
   const router = useRouter();
@@ -22,6 +22,7 @@ export default function StaffNavigation() {
     { label: 'Dashboard', href: '/staff/dashboard', icon: <LayoutDashboard className="h-4.5 w-4.5" /> },
     { label: 'Order Queue', href: '/staff/orders', icon: <ClipboardList className="h-4.5 w-4.5" /> },
     { label: 'Inventory control', href: '/staff/products', icon: <Database className="h-4.5 w-4.5" /> },
+    { label: 'Coupons', href: '/staff/coupons', icon: <Tag className="h-4.5 w-4.5" /> },
   ];
 
   // Only admins can see staff management

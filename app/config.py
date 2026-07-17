@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     ENV: str = "production"  # local | staging | production
     ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
 
+    # Phase 6: Loyalty & Coupon settings
+    LOYALTY_EARN_RATE: int = 100      # ₹ spent per 1 point
+    LOYALTY_REDEEM_RATE: int = 10     # points needed per ₹1 discount
+    LOYALTY_MIN_REDEEM: int = 100     # minimum points balance to redeem
+
+
     # AWS S3 Settings
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None

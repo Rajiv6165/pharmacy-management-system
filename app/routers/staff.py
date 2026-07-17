@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
-from app.models import Order, Prescription, Product, InventoryLog, Staff
+from app.models import Order, Prescription, Product, InventoryLog, Staff, Coupon, CouponUsage, Customer
 from app.auth.security import get_current_staff
 from app.schemas.order import OrderResponse, PrescriptionResponse
 from app.schemas.product import ProductResponse
@@ -11,6 +11,7 @@ from app.schemas.staff import (
     OrderStatusUpdate, PrescriptionVerifyRequest, ProductCreate, ProductUpdate, 
     RestockRequest, InventoryLogResponse
 )
+from app.schemas.loyalty import CouponCreate, CouponUpdate, CouponResponse
 
 router = APIRouter(prefix="/staff", tags=["staff"])
 
@@ -300,3 +301,98 @@ def get_inventory_log(
         })
         
     return response_logs
+
+
+# ============ COUPONS ============
+
+@router.post("/coupons", response_model=CouponResponse, status_code=status.HTTP_201_CREATED)
+def create_coupon(
+    data: CouponCreate,
+    staff: Staff = Depends(get_current_staff),
+    db: Session = Depends(get_db)
+):
+    existing = db.query(Coupon).filter(Coupon.code == data.code).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Coupon code already exists"
+        )
+    coupon = Coupon(
+        code=data.code,
+        description=data.description,
+        discount_type=data.discount_type,
+        discount_value=data.discount_value,
+        min_order_amount=data.min_order_amount,
+        max_discount_amount=data.max_discount_amount,
+        usage_limit_total=data.usage_limit_total,
+        usage_limit_per_user=data.usage_limit_per_user,
+        valid_from=data.valid_from,
+        valid_until=data.valid_until,
+        is_active=data.is_active,
+        created_by_staff_id=staff.id
+    )
+    db.add(coupon)
+    db.commit()
+    db.refresh(coupon)
+    
+    c_dict = coupon.__dict__.copy()
+    c_dict["usage_count"] = 0
+    return c_dict
+
+@router.get("/coupons", response_model=List[CouponResponse])
+def list_coupons(
+    staff: Staff = Depends(get_current_staff),
+    db: Session = Depends(get_db)
+):
+    coupons = db.query(Coupon).order_by(Coupon.created_at.desc()).all()
+    response = []
+    for c in coupons:
+        usage_count = db.query(CouponUsage).filter(CouponUsage.coupon_id == c.id).count()
+        c_dict = c.__dict__.copy()
+        c_dict["usage_count"] = usage_count
+        response.append(c_dict)
+    return response
+
+@router.put("/coupons/{id}", response_model=CouponResponse)
+def edit_coupon(
+    id: int,
+    data: CouponUpdate,
+    staff: Staff = Depends(get_current_staff),
+    db: Session = Depends(get_db)
+):
+    coupon = db.query(Coupon).filter(Coupon.id == id).first()
+    if not coupon:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Coupon not found"
+        )
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(coupon, key, value)
+    db.commit()
+    db.refresh(coupon)
+    
+    usage_count = db.query(CouponUsage).filter(CouponUsage.coupon_id == coupon.id).count()
+    c_dict = coupon.__dict__.copy()
+    c_dict["usage_count"] = usage_count
+    return c_dict
+
+@router.get("/coupons/{id}/usage")
+def get_coupon_usage(
+    id: int,
+    staff: Staff = Depends(get_current_staff),
+    db: Session = Depends(get_db)
+):
+    usages = db.query(CouponUsage).filter(CouponUsage.coupon_id == id).order_by(CouponUsage.used_at.desc()).all()
+    response = []
+    for u in usages:
+        response.append({
+            "id": u.id,
+            "customer_id": u.customer_id,
+            "customer_name": u.customer.name,
+            "customer_phone": u.customer.phone,
+            "order_id": u.order_id,
+            "discount_applied": float(u.discount_applied),
+            "used_at": u.used_at
+        })
+    return response

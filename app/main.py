@@ -25,6 +25,7 @@ from app.routers.payments import router as payments_router
 from app.routers.staff import router as staff_router
 from app.routers.admin import router as admin_router
 from app.routers.support import router as support_router
+from app.routers.loyalty import router as loyalty_router
 
 from contextlib import asynccontextmanager
 from app.database import SessionLocal
@@ -90,6 +91,7 @@ app.include_router(payments_router)
 app.include_router(staff_router)
 app.include_router(admin_router)
 app.include_router(support_router)
+app.include_router(loyalty_router)
 
 @app.get("/")
 def read_root():

@@ -352,8 +352,28 @@ export default function StaffOrderDetailPage() {
                         {order.payment_status}
                       </span>
                     </div>
+                    {Number(order.discount_amount) > 0 && (
+                      <div className="border-t border-slate-900 pt-2 space-y-1.5">
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Promo Discount:</span>
+                          <span className="text-rose-400 font-bold">-₹{Number(order.discount_amount).toFixed(2)}</span>
+                        </div>
+                        {order.points_redeemed > 0 && (
+                          <div className="flex justify-between text-[10px] text-slate-400">
+                            <span>Points Used:</span>
+                            <span>{order.points_redeemed} pts</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {order.points_earned > 0 && (
+                      <div className="flex justify-between border-t border-slate-900 pt-2">
+                        <span className="text-slate-500">Points Awarded:</span>
+                        <span className="text-emerald-400 font-bold">+{order.points_earned} pts</span>
+                      </div>
+                    )}
                     {order.razorpay_payment_id && (
-                      <div className="flex flex-col gap-1 pt-1">
+                      <div className="flex flex-col gap-1 pt-1 border-t border-slate-900">
                         <span className="text-[10px] text-slate-550 font-bold">Transaction Ref ID</span>
                         <span className="text-xxs text-slate-400 bg-slate-950 px-2 py-1.5 rounded font-mono break-all">{order.razorpay_payment_id}</span>
                       </div>

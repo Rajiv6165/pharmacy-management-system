@@ -11,10 +11,13 @@ class Customer(Base):
     phone = Column(String(15), unique=True, nullable=False, index=True)
     email = Column(String(150), unique=True, nullable=True, index=True)
     password_hash = Column(String(255), nullable=False)
+    loyalty_points = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, server_default=func.now())
 
     addresses = relationship("Address", back_populates="customer", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="customer")
+    loyalty_transactions = relationship("LoyaltyTransaction", back_populates="customer", cascade="all, delete-orphan")
+    coupon_usages = relationship("CouponUsage", back_populates="customer", cascade="all, delete-orphan")
 
 
 class Staff(Base):
@@ -91,14 +94,20 @@ class Order(Base):
     total_amount = Column(Numeric(10, 2), nullable=False)
     requires_rx_check = Column(Boolean, default=False)
     handled_by_staff_id = Column(Integer, ForeignKey("staff.id"), nullable=True)
+    coupon_id = Column(Integer, ForeignKey("coupons.id"), nullable=True)
+    discount_amount = Column(Numeric(10, 2), default=0.0)
+    points_redeemed = Column(Integer, default=0)
+    points_earned = Column(Integer, default=0)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     customer = relationship("Customer", back_populates="orders")
     address = relationship("Address")
     handled_by = relationship("Staff")
+    coupon = relationship("Coupon")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
     prescriptions = relationship("Prescription", back_populates="order", cascade="all, delete-orphan")
+    coupon_usages = relationship("CouponUsage", back_populates="order", cascade="all, delete-orphan")
 
 
 class OrderItem(Base):
@@ -144,3 +153,55 @@ class InventoryLog(Base):
     product = relationship("Product")
     staff = relationship("Staff")
     order = relationship("Order")
+
+
+class LoyaltyTransaction(Base):
+    __tablename__ = "loyalty_transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id", ondelete="CASCADE"), nullable=False)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="SET NULL"), nullable=True)
+    points_change = Column(Integer, nullable=False)
+    reason = Column(String(30), nullable=False)  # 'earned' | 'redeemed' | 'admin_adjustment' | 'expired'
+    balance_after = Column(Integer, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    customer = relationship("Customer", back_populates="loyalty_transactions")
+    order = relationship("Order")
+
+
+class Coupon(Base):
+    __tablename__ = "coupons"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(30), unique=True, nullable=False, index=True)
+    description = Column(String(200))
+    discount_type = Column(String(20), nullable=False)  # 'percentage' | 'flat'
+    discount_value = Column(Numeric(10, 2), nullable=False)
+    min_order_amount = Column(Numeric(10, 2), default=0.0)
+    max_discount_amount = Column(Numeric(10, 2), nullable=True)
+    usage_limit_total = Column(Integer, nullable=True)
+    usage_limit_per_user = Column(Integer, default=1)
+    valid_from = Column(DateTime, nullable=False)
+    valid_until = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_by_staff_id = Column(Integer, ForeignKey("staff.id"), nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    created_by = relationship("Staff")
+    usages = relationship("CouponUsage", back_populates="coupon", cascade="all, delete-orphan")
+
+
+class CouponUsage(Base):
+    __tablename__ = "coupon_usage"
+
+    id = Column(Integer, primary_key=True, index=True)
+    coupon_id = Column(Integer, ForeignKey("coupons.id", ondelete="CASCADE"), nullable=False)
+    customer_id = Column(Integer, ForeignKey("customers.id", ondelete="CASCADE"), nullable=False)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
+    discount_applied = Column(Numeric(10, 2), nullable=False)
+    used_at = Column(DateTime, server_default=func.now())
+
+    coupon = relationship("Coupon", back_populates="usages")
+    customer = relationship("Customer", back_populates="coupon_usages")
+    order = relationship("Order", back_populates="coupon_usages")

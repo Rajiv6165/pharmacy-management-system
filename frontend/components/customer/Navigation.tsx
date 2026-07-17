@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, User, LogOut, Package, MapPin, Activity, Menu, X, KeyRound } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, MapPin, Activity, Menu, X, KeyRound, Gift } from 'lucide-react';
 
 export default function CustomerNavigation() {
   const router = useRouter();
@@ -103,6 +103,14 @@ export default function CustomerNavigation() {
                     >
                       <Package className="h-4 w-4 text-teal-400" />
                       Order History
+                    </Link>
+                    <Link
+                      href="/loyalty"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800/50 hover:text-white transition-colors"
+                    >
+                      <Gift className="h-4 w-4 text-teal-400" />
+                      Loyalty Rewards
                     </Link>
                     <hr className="border-slate-800 my-2" />
                     <button
@@ -202,6 +210,14 @@ export default function CustomerNavigation() {
               >
                 <Package className="h-5 w-5 text-teal-400" />
                 Orders
+              </Link>
+              <Link
+                href="/loyalty"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-base text-slate-300 hover:bg-slate-900"
+              >
+                <Gift className="h-5 w-5 text-teal-400" />
+                Loyalty Rewards
               </Link>
               <button
                 onClick={handleLogout}

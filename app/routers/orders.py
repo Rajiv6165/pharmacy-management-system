@@ -11,6 +11,10 @@ from app.schemas.order import OrderCreate, OrderResponse, PrescriptionResponse
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
+from decimal import Decimal
+from datetime import datetime
+from app.models import Order, OrderItem, Product, Address, Prescription, Customer, Coupon, CouponUsage, LoyaltyTransaction
+
 @router.post("", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def create_order(
     data: OrderCreate,
@@ -32,7 +36,7 @@ def create_order(
             )
 
     # Validate items and calculate total amount
-    total_amount = 0
+    total_amount = Decimal('0.0')
     requires_rx_check = False
     order_items_to_create = []
     
@@ -54,14 +58,102 @@ def create_order(
         if product.requires_rx:
             requires_rx_check = True
             
-        price = product.price
+        price = Decimal(str(product.price))
         total_amount += price * item_in.quantity
         
         order_items_to_create.append((product, item_in.quantity, price))
         
+    # Phase 6: Coupon and Loyalty calculations
+    coupon_discount = Decimal('0.0')
+    points_discount = Decimal('0.0')
+    coupon_id = None
+    points_redeemed_final = 0
+    
+    # 1. Coupon validation
+    if data.coupon_code:
+        coupon = db.query(Coupon).filter(Coupon.code == data.coupon_code).first()
+        if not coupon:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Coupon code does not exist"
+            )
+        if not coupon.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Coupon is not active"
+            )
+        now = datetime.now()
+        if now < coupon.valid_from or now > coupon.valid_until:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Coupon has expired or is not yet valid"
+            )
+        # Usage limits
+        if coupon.usage_limit_total is not None:
+            total_usages = db.query(CouponUsage).filter(CouponUsage.coupon_id == coupon.id).count()
+            if total_usages >= coupon.usage_limit_total:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Coupon has reached its total usage limit"
+                )
+        user_usages = db.query(CouponUsage).filter(
+            CouponUsage.coupon_id == coupon.id,
+            CouponUsage.customer_id == customer.id
+        ).count()
+        if user_usages >= coupon.usage_limit_per_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You have already used this coupon code"
+            )
+        if total_amount < coupon.min_order_amount:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Minimum order amount of ₹{coupon.min_order_amount:.2f} is required for this coupon"
+            )
+            
+        # Calculate discount
+        if coupon.discount_type == "flat":
+            coupon_discount = coupon.discount_value
+        elif coupon.discount_type == "percentage":
+            coupon_discount = total_amount * (coupon.discount_value / Decimal('100.0'))
+            if coupon.max_discount_amount is not None:
+                coupon_discount = min(coupon_discount, coupon.max_discount_amount)
+        
+        # Cap at total amount
+        coupon_discount = min(coupon_discount, total_amount)
+        coupon_id = coupon.id
+
+    # 2. Loyalty points validation
+    if data.points_to_redeem > 0:
+        if customer.loyalty_points < data.points_to_redeem:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Insufficient loyalty points balance ({customer.loyalty_points})"
+            )
+        if data.points_to_redeem < settings.LOYALTY_MIN_REDEEM:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Minimum points required to redeem is {settings.LOYALTY_MIN_REDEEM}"
+            )
+            
+        remaining_payable = total_amount - coupon_discount
+        max_points_needed = int(remaining_payable * Decimal(str(settings.LOYALTY_REDEEM_RATE)))
+        
+        points_redeemed_final = min(data.points_to_redeem, max_points_needed)
+        if points_redeemed_final > 0:
+            points_discount = Decimal(points_redeemed_final) / Decimal(str(settings.LOYALTY_REDEEM_RATE))
+        else:
+            points_redeemed_final = 0
+            points_discount = Decimal('0.0')
+
+    discount_amount = coupon_discount + points_discount
+    final_total_amount = total_amount - discount_amount
+    final_total_amount = max(Decimal('0.0'), final_total_amount)
+    
+    # Calculate pre-earned points (final amount after discount)
+    points_earned = int(final_total_amount / Decimal(str(settings.LOYALTY_EARN_RATE)))
+
     # Create order object
-    # Initial status is pending. For COD, if no prescription required, we confirm it AFTER adding the items,
-    # which will issue an UPDATE on the orders table and correctly fire the db stock decrement trigger!
     order = Order(
         customer_id=customer.id,
         address_id=data.address_id if data.delivery_type == "delivery" else None,
@@ -69,12 +161,43 @@ def create_order(
         status="pending",
         payment_method=data.payment_method,
         payment_status="unpaid",
-        total_amount=total_amount,
-        requires_rx_check=requires_rx_check
+        total_amount=final_total_amount,
+        requires_rx_check=requires_rx_check,
+        coupon_id=coupon_id,
+        discount_amount=discount_amount,
+        points_redeemed=points_redeemed_final,
+        points_earned=points_earned
     )
     db.add(order)
     db.commit()
     db.refresh(order)
+    
+    # Deduct customer loyalty points immediately if points were redeemed
+    if points_redeemed_final > 0:
+        customer.loyalty_points -= points_redeemed_final
+        db.commit()
+        db.refresh(customer)
+        
+        loyalty_tx = LoyaltyTransaction(
+            customer_id=customer.id,
+            order_id=order.id,
+            points_change=-points_redeemed_final,
+            reason="redeemed",
+            balance_after=customer.loyalty_points
+        )
+        db.add(loyalty_tx)
+        
+    # Record coupon usage if a coupon was applied
+    if coupon_id is not None:
+        usage = CouponUsage(
+            coupon_id=coupon_id,
+            customer_id=customer.id,
+            order_id=order.id,
+            discount_applied=coupon_discount
+        )
+        db.add(usage)
+        
+    db.commit()
     
     # Create order items
     for product, qty, price in order_items_to_create:
@@ -110,13 +233,15 @@ def create_order(
             "id": item.id,
             "product_id": item.product_id,
             "quantity": item.quantity,
-            "price_at_order": item.price_at_order,
+            "price_at_order": float(item.price_at_order),
             "product_name": item.product.name
         })
         
     order_dict = order.__dict__.copy()
     order_dict["items"] = response_items
     order_dict["prescriptions"] = [p.__dict__ for p in order.prescriptions]
+    order_dict["discount_amount"] = float(order.discount_amount)
+    order_dict["total_amount"] = float(order.total_amount)
     return order_dict
 
 @router.post("/{id}/prescription", response_model=PrescriptionResponse, status_code=status.HTTP_201_CREATED)

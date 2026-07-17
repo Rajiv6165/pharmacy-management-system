@@ -318,6 +318,41 @@ export default function OrderDetailPage() {
                         </div>
                       </div>
                     ))}
+
+                    {/* Receipts Summary */}
+                    <div className="pt-4 border-t border-slate-900 space-y-2 text-xs font-semibold text-slate-450">
+                      <div className="flex justify-between">
+                        <span>Items Subtotal</span>
+                        <span className="text-slate-200">
+                          ₹{(Number(order.total_amount) + Number(order.discount_amount || 0)).toFixed(2)}
+                        </span>
+                      </div>
+                      {Number(order.discount_amount) > 0 && (
+                        <div className="space-y-2">
+                          {order.points_redeemed > 0 && (
+                            <div className="flex justify-between text-emerald-400 font-bold">
+                              <span>Points Redeemed ({order.points_redeemed} pts)</span>
+                              <span>-₹{(order.points_redeemed / 10).toFixed(2)}</span>
+                            </div>
+                          )}
+                          {Number(order.discount_amount) - (order.points_redeemed / 10) > 0 && (
+                            <div className="flex justify-between text-emerald-400 font-bold">
+                              <span>Coupon Discount</span>
+                              <span>-₹{(Number(order.discount_amount) - (order.points_redeemed / 10)).toFixed(2)}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex justify-between text-sm font-bold text-teal-400 pt-2 border-t border-slate-900/50">
+                        <span>Total Paid</span>
+                        <span>₹{Number(order.total_amount).toFixed(2)}</span>
+                      </div>
+                      {order.points_earned > 0 && (
+                        <p className="text-[10px] text-slate-500 pt-1 text-right">
+                          Estimated points from this order: {order.points_earned} pts
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

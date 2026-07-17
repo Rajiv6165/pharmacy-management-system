@@ -5,10 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Staff, Order
+from app.models import Staff, Order, Customer, LoyaltyTransaction
 from app.auth.security import get_current_admin, hash_password, get_current_staff
 from app.schemas.auth import StaffResponse
 from app.schemas.staff import StaffCreate, StaffUpdate, DashboardSummaryResponse
+from app.schemas.loyalty import LoyaltyAdjustRequest
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -105,4 +106,41 @@ def get_dashboard_summary(
         "today_orders_count": today_orders_count,
         "today_revenue": today_revenue,
         "pending_rx_count": pending_rx_count
+    }
+
+
+@router.post("/loyalty/adjust")
+def adjust_loyalty_points(
+    data: LoyaltyAdjustRequest,
+    admin: Staff = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    customer = db.query(Customer).filter(Customer.id == data.customer_id).first()
+    if not customer:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer not found"
+        )
+        
+    customer.loyalty_points += data.points_change
+    if customer.loyalty_points < 0:
+        customer.loyalty_points = 0
+        
+    db.commit()
+    db.refresh(customer)
+    
+    # Record transaction
+    loyalty_tx = LoyaltyTransaction(
+        customer_id=customer.id,
+        points_change=data.points_change,
+        reason=data.reason,
+        balance_after=customer.loyalty_points
+    )
+    db.add(loyalty_tx)
+    db.commit()
+    
+    return {
+        "customer_id": customer.id,
+        "loyalty_points": customer.loyalty_points,
+        "message": f"Successfully adjusted customer points balance by {data.points_change} points."
     }

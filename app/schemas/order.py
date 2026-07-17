@@ -12,6 +12,8 @@ class OrderCreate(BaseModel):
     address_id: Optional[int] = None
     payment_method: str = Field(..., pattern="^(online|cod)$")
     items: List[OrderItemCreate]
+    coupon_code: Optional[str] = None
+    points_to_redeem: int = Field(default=0, ge=0)
 
 class OrderItemResponse(BaseModel):
     id: int
@@ -49,6 +51,10 @@ class OrderResponse(BaseModel):
     total_amount: Decimal
     requires_rx_check: bool
     handled_by_staff_id: Optional[int] = None
+    coupon_id: Optional[int] = None
+    discount_amount: Decimal
+    points_redeemed: int
+    points_earned: int
     created_at: datetime
     updated_at: datetime
     items: List[OrderItemResponse]

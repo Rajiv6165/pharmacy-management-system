@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.database import Base, get_db
 from app.config import settings
-from app.models import Category, Staff, Product, Order, InventoryLog, Address, Customer
+from app.models import Category, Staff, Product, Order, InventoryLog, Address, Customer, Coupon, CouponUsage, LoyaltyTransaction
 
 # Use the same database URL or override for testing.
 # Since we have the credentials, we can use the same DB, but clean up our test data.
@@ -25,7 +25,10 @@ def db_session():
     try:
         # Clear existing test data to ensure clean run
         db.query(InventoryLog).delete()
+        db.query(CouponUsage).delete()
+        db.query(LoyaltyTransaction).delete()
         db.query(Order).delete()
+        db.query(Coupon).delete()
         db.query(Product).delete()
         db.query(Category).delete()
         db.query(Address).delete()
@@ -526,4 +529,182 @@ def test_support_chat_medical_deflection(client):
     assert "response" in data
     assert "pharmacist" in data["response"]
     assert "contact the store directly" in data["response"]
+
+
+def test_loyalty_and_coupons_flow(client, db_session):
+    # 1. Login staff/admin to manage coupons
+    login_data = {"phone": "9999999999", "password": "Admin@123"}
+    staff_token = client.post("/auth/staff/login", json=login_data).json()["access_token"]
+    staff_headers = {"Authorization": f"Bearer {staff_token}"}
+
+    # 2. Login customer
+    login_data = {"phone": "9876543210", "password": "password123"}
+    cust_token = client.post("/auth/customer/login", json=login_data).json()["access_token"]
+    cust_headers = {"Authorization": f"Bearer {cust_token}"}
+
+    # 3. Create a non-Rx product for testing checkout quickly
+    from app.models import Category
+    category = db_session.query(Category).first()
+    if not category:
+        category = Category(name="General OTC")
+        db_session.add(category)
+        db_session.commit()
+        db_session.refresh(category)
+
+    product_data = {
+        "name": "Paracetamol 650mg",
+        "brand": "Cipa",
+        "category_id": category.id,
+        "description": "Pain relief",
+        "price": 200.00,
+        "mrp": 200.00,
+        "stock_qty": 100,
+        "unit": "strip of 15",
+        "requires_rx": False,
+        "image_url": "http://example.com/para.jpg",
+        "is_active": True,
+        "low_stock_alert": 10
+    }
+    response = client.post("/staff/products", json=product_data, headers=staff_headers)
+    assert response.status_code == 201
+    product_id = response.json()["id"]
+
+    # Ensure customer has a default address
+    response = client.get("/addresses", headers=cust_headers)
+    assert response.status_code == 200
+    addresses = response.json()
+    if not addresses:
+        addr = {
+            "label": "Home",
+            "full_address": "123 Main St, Apartment 4B",
+            "landmark": "Near Central Park",
+            "latitude": 40.7128,
+            "longitude": -74.0060,
+            "is_default": True
+        }
+        addr_res = client.post("/addresses", json=addr, headers=cust_headers)
+        address_id = addr_res.json()["id"]
+    else:
+        address_id = addresses[0]["id"]
+
+    # 4. Create coupons (Staff)
+    # Coupon 1: flat discount coupon
+    flat_coupon = {
+        "code": "FLAT50",
+        "description": "Flat ₹50 off",
+        "discount_type": "flat",
+        "discount_value": 50.00,
+        "min_order_amount": 150.00,
+        "max_discount_amount": None,
+        "usage_limit_total": 10,
+        "usage_limit_per_user": 1,
+        "valid_from": "2026-07-01T00:00:00",
+        "valid_until": "2026-07-30T00:00:00",
+        "is_active": True
+    }
+    response = client.post("/staff/coupons", json=flat_coupon, headers=staff_headers)
+    assert response.status_code == 201
+
+    # Coupon 2: percentage discount coupon
+    pct_coupon = {
+        "code": "WELCOME10",
+        "description": "10% off up to ₹30",
+        "discount_type": "percentage",
+        "discount_value": 10.00,
+        "min_order_amount": 100.00,
+        "max_discount_amount": 30.00,
+        "usage_limit_total": 100,
+        "usage_limit_per_user": 2,
+        "valid_from": "2026-07-01T00:00:00",
+        "valid_until": "2026-07-30T00:00:00",
+        "is_active": True
+    }
+    response = client.post("/staff/coupons", json=pct_coupon, headers=staff_headers)
+    assert response.status_code == 201
+
+    # 5. Validate coupons
+    # Min order validation failure
+    response = client.post("/coupons/validate", json={"code": "FLAT50", "cart_total": 100.00}, headers=cust_headers)
+    assert response.status_code == 200
+    assert response.json()["valid"] is False
+    assert "Minimum order" in response.json()["message"]
+
+    # Validation success (percentage cap test)
+    response = client.post("/coupons/validate", json={"code": "WELCOME10", "cart_total": 400.00}, headers=cust_headers)
+    assert response.status_code == 200
+    assert response.json()["valid"] is True
+    assert float(response.json()["discount_amount"]) == 30.00
+
+    # 6. Admin loyalty adjust: Give user initial points
+    response = client.get("/loyalty/balance", headers=cust_headers)
+    assert response.status_code == 200
+    initial_balance = response.json()["balance"]
+
+    from app.models import Customer as DB_Customer
+    customer = db_session.query(DB_Customer).filter(DB_Customer.phone == "9876543210").first()
+    assert customer is not None
+    customer_id = customer.id
+
+    adjust_payload = {
+        "customer_id": customer_id,
+        "points_change": 500,
+        "reason": "admin_adjustment"
+    }
+    response = client.post("/admin/loyalty/adjust", json=adjust_payload, headers=staff_headers)
+    assert response.status_code == 200
+    assert response.json()["loyalty_points"] == initial_balance + 500
+
+    # Check balance endpoint
+    response = client.get("/loyalty/balance", headers=cust_headers)
+    assert response.status_code == 200
+    assert response.json()["balance"] == initial_balance + 500
+
+    # 7. Checkout applying both FLAT50 and loyalty points (stacking)
+    # Cart total = 1 item of Paracetamol = ₹200
+    # Apply FLAT50: cart drops to 150
+    # Redeem 300 points (value = ₹30): cart drops to 120
+    # Final payable = ₹120.00
+    checkout_payload = {
+        "delivery_type": "pickup",
+        "address_id": None,
+        "payment_method": "cod",
+        "items": [{"product_id": product_id, "quantity": 1}],
+        "coupon_code": "FLAT50",
+        "points_to_redeem": 300
+    }
+    response = client.post("/orders", json=checkout_payload, headers=cust_headers)
+    assert response.status_code == 201
+    order = response.json()
+    assert float(order["total_amount"]) == 120.00
+    assert float(order["discount_amount"]) == 80.00
+    assert order["points_redeemed"] == 300
+
+    # Check points balance: decreased by 300 (redeemed), increased by 1 (earned)
+    # because COD + no Rx check auto-confirms immediately on creation!
+    response = client.get("/loyalty/balance", headers=cust_headers)
+    assert response.json()["balance"] == initial_balance + 201
+
+    # Check loyalty transaction history
+    response = client.get("/loyalty/history", headers=cust_headers)
+    assert response.status_code == 200
+    history = response.json()
+    assert len(history) >= 2 # admin adjust, redeemed, and earned (via trigger)
+    
+    # 8. Confirm the order (no-op since already confirmed, but should succeed)
+    order_id = order["id"]
+    response = client.put(f"/staff/orders/{order_id}/status", json={"status": "confirmed"}, headers=staff_headers)
+    assert response.status_code == 200
+
+    # Verify balance remains initial_balance + 201
+    response = client.get("/loyalty/balance", headers=cust_headers)
+    assert response.json()["balance"] == initial_balance + 201
+
+    # 9. Cancel order and verify points refund (redeemed returned, earned reversed)
+    # Cancelled: 201 points -> reverse earned (1 point) -> refund redeemed (300 points) -> Final: initial_balance + 500 points
+    response = client.put(f"/staff/orders/{order_id}/status", json={"status": "cancelled"}, headers=staff_headers)
+    assert response.status_code == 200
+
+    response = client.get("/loyalty/balance", headers=cust_headers)
+    assert response.json()["balance"] == initial_balance + 500
+
 

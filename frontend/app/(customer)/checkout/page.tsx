@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/api';
 import { Address } from '@/lib/types';
 import CustomerNavigation from '@/components/customer/Navigation';
-import { MapPin, CreditCard, DollarSign, Upload, FileText, ShoppingBag, ShieldCheck, CheckCircle2, ChevronRight } from 'lucide-react';
+import { MapPin, CreditCard, DollarSign, Upload, FileText, ShoppingBag, ShieldCheck, CheckCircle2, ChevronRight, Gift } from 'lucide-react';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -25,6 +25,16 @@ export default function CheckoutPage() {
   const [addressId, setAddressId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
   const [rxFile, setRxFile] = useState<File | null>(null);
+
+  // Phase 6 loyalty/coupon states
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCouponCode, setAppliedCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState('');
+  const [couponSuccess, setCouponSuccess] = useState('');
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -49,8 +59,63 @@ export default function CheckoutPage() {
       }
     };
 
+    const fetchLoyaltyBalance = async () => {
+      try {
+        const data = await apiFetch('/loyalty/balance');
+        setLoyaltyPoints(data.balance);
+      } catch (err) {
+        console.error('Failed to fetch loyalty balance:', err);
+      }
+    };
+
     fetchAddresses();
+    fetchLoyaltyBalance();
   }, [cartItems, router]);
+
+  const handleApplyCoupon = async () => {
+    setCouponError('');
+    setCouponSuccess('');
+    if (!couponCode.trim()) return;
+    setValidatingCoupon(true);
+    try {
+      const result = await apiFetch('/coupons/validate', {
+        method: 'POST',
+        body: {
+          code: couponCode.trim(),
+          cart_total: Number(cartTotal),
+        },
+      });
+      if (result.valid) {
+        setCouponDiscount(Number(result.discount_amount));
+        setAppliedCouponCode(couponCode.trim());
+        setCouponSuccess(result.message);
+      } else {
+        setCouponError(result.message);
+        setCouponDiscount(0);
+        setAppliedCouponCode('');
+      }
+    } catch (err: any) {
+      setCouponError(err.message || 'Failed to validate coupon.');
+      setCouponDiscount(0);
+      setAppliedCouponCode('');
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleApplyMaxPoints = () => {
+    const remainingPayable = Number(cartTotal) - couponDiscount;
+    const maxRedeemablePoints = Math.min(loyaltyPoints, Math.floor(remainingPayable * 10));
+    // Must be at least 100 points to redeem
+    if (maxRedeemablePoints >= 100) {
+      setPointsToRedeem(maxRedeemablePoints);
+    } else {
+      setPointsToRedeem(0);
+    }
+  };
+
+  const pointsDiscount = pointsToRedeem >= 100 ? (pointsToRedeem / 10) : 0;
+  const finalPayable = Math.max(0, Number(cartTotal) - couponDiscount - pointsDiscount);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -86,6 +151,8 @@ export default function CheckoutPage() {
         address_id: deliveryType === 'delivery' ? addressId : null,
         payment_method: paymentMethod,
         items: itemsPayload,
+        coupon_code: appliedCouponCode || null,
+        points_to_redeem: pointsToRedeem || 0,
       };
 
       const order = await apiFetch('/orders', {
@@ -107,10 +174,10 @@ export default function CheckoutPage() {
       }
 
       // Step 3: Handle Online Payment or Cash Checkout
-      if (paymentMethod === 'online') {
+      if (paymentMethod === 'online' && finalPayable > 0) {
         await initiateRazorpayPayment(orderId);
       } else {
-        // COD order completed successfully
+        // COD or fully discounted order completed successfully
         clearCart();
         router.push(`/orders/${orderId}`);
       }
@@ -185,7 +252,7 @@ export default function CheckoutPage() {
             <h1 className="text-3xl font-extrabold text-white tracking-tight">Checkout</h1>
 
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm rounded-2xl">
+              <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-450 text-sm rounded-2xl">
                 {error}
               </div>
             )}
@@ -279,7 +346,7 @@ export default function CheckoutPage() {
                             {addr.full_address}
                           </p>
                           {addr.landmark && (
-                            <span className="text-xxs text-slate-500 block">
+                            <span className="text-xxs text-slate-550 block">
                               Landmark: {addr.landmark}
                             </span>
                           )}
@@ -325,12 +392,88 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Step 4: Prescription File Upload */}
+            {/* Step 4: Coupons & Loyalty */}
+            <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-4 backdrop-blur-xl">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Gift className="h-5 w-5 text-teal-400" />
+                {deliveryType === 'delivery' ? '4.' : '3.'} Coupons & Loyalty Rewards
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Coupons */}
+                <div className="p-5 rounded-2xl bg-slate-950/40 border border-slate-900 space-y-3">
+                  <span className="text-xxs font-bold text-slate-500 uppercase tracking-wider block">
+                    Promo Coupon Code
+                  </span>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. WELCOME10"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      className="flex-grow px-3 py-2 border border-slate-800 rounded-xl bg-slate-900/20 text-slate-200 uppercase placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-teal-500/50 text-xs font-bold"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={validatingCoupon}
+                      className="px-4 py-2 bg-teal-450 hover:bg-teal-400 disabled:opacity-40 text-slate-950 rounded-xl text-xs font-extrabold cursor-pointer transition-colors"
+                    >
+                      {validatingCoupon ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p className="text-xxs text-rose-400 font-semibold">{couponError}</p>
+                  )}
+                  {couponSuccess && (
+                    <p className="text-xxs text-emerald-405 font-semibold">{couponSuccess}</p>
+                  )}
+                </div>
+
+                {/* Loyalty */}
+                <div className="p-5 rounded-2xl bg-slate-950/40 border border-slate-900 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xxs font-bold text-slate-500 uppercase tracking-wider">
+                      Redeem Points
+                    </span>
+                    <span className="text-xxs font-extrabold text-teal-400">
+                      Balance: {loyaltyPoints} pts
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Points to redeem"
+                      value={pointsToRedeem || ''}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setPointsToRedeem(Math.min(val, loyaltyPoints));
+                      }}
+                      className="flex-grow px-3 py-2 border border-slate-800 rounded-xl bg-slate-900/20 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-teal-500/50 text-xs font-bold"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyMaxPoints}
+                      className="px-3 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-350 hover:text-white rounded-xl text-xs font-extrabold cursor-pointer transition-colors"
+                    >
+                      Use Max
+                    </button>
+                  </div>
+
+                  <p className="text-[10px] text-slate-500 font-semibold leading-tight">
+                    Min 100 points required. 10 points = ₹1.00 discount.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 5: Prescription File Upload */}
             {requiresRx && (
               <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-4 backdrop-blur-xl">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <FileText className="h-5 w-5 text-teal-400" />
-                  {deliveryType === 'delivery' ? '4.' : '3.'} Upload Doctor Prescription
+                  {deliveryType === 'delivery' ? '5.' : '4.'} Upload Doctor Prescription
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Your order contains regulated medications that require medical validation. Upload a clear photograph or digital PDF of your doctor prescription.
@@ -402,15 +545,37 @@ export default function CheckoutPage() {
 
               <hr className="border-slate-900" />
 
-              <div className="space-y-3">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+              <div className="space-y-3 text-xs font-semibold text-slate-450">
+                <div className="flex justify-between">
+                  <span>Cart Items Subtotal</span>
+                  <span className="text-slate-200">₹{Number(cartTotal).toFixed(2)}</span>
+                </div>
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-400 font-bold">
+                    <span>Coupon Applied</span>
+                    <span>-₹{couponDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                {pointsDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-400 font-bold">
+                    <span>Points Redeemed ({pointsToRedeem} pts)</span>
+                    <span>-₹{pointsDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-baseline pt-3 border-t border-slate-900">
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
                     Total Pay
                   </span>
                   <span className="text-2xl font-black text-teal-400">
-                    ₹{Number(cartTotal).toFixed(2)}
+                    ₹{finalPayable.toFixed(2)}
                   </span>
                 </div>
+                
+                {finalPayable > 0 && (
+                  <p className="text-[10px] text-slate-550 pt-2 text-center">
+                    You will earn approximately {Math.floor(finalPayable / 100)} loyalty points on this order.
+                  </p>
+                )}
               </div>
 
               {/* Security Badge */}
