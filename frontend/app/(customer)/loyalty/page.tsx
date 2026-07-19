@@ -49,76 +49,76 @@ export default function LoyaltyDashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col min-h-screen bg-paper text-ink font-sans">
       <CustomerNavigation />
 
       <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         {/* Title */}
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight sm:text-4xl">
             Loyalty Rewards
           </h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-1 text-xs text-ink/70">
             Earn points on every purchase and redeem them for direct discounts on your future orders.
           </p>
         </div>
 
         {error && (
-          <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm rounded-2xl">
+          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded font-mono uppercase tracking-wider">
             {error}
           </div>
         )}
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
-            <div className="h-32 bg-slate-900/30 rounded-3xl md:col-span-1" />
-            <div className="h-32 bg-slate-900/30 rounded-3xl md:col-span-2" />
+            <div className="h-32 bg-white border border-primary-dark/10 rounded md:col-span-1" />
+            <div className="h-32 bg-white border border-primary-dark/10 rounded md:col-span-2" />
           </div>
         ) : (
           <div className="space-y-8">
             {/* Top Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Balance Card */}
-              <div className="p-6 rounded-3xl bg-slate-900/20 border border-slate-900 hover:border-slate-850 transition-all flex flex-col justify-between space-y-4 backdrop-blur-xl">
+              <div className="p-6 rounded bg-white border border-primary-dark/15 hover:border-accent/30 transition-colors flex flex-col justify-between space-y-4 shadow-xxs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider">
                     Points Balance
                   </span>
-                  <div className="p-2 bg-teal-500/10 rounded-xl text-teal-400">
-                    <Award className="h-5 w-5" />
+                  <div className="p-2 bg-accent/10 border border-accent/20 rounded text-accent">
+                    <Award className="h-4.5 w-4.5" />
                   </div>
                 </div>
                 <div>
-                  <span className="text-4xl font-black text-white">{balance ?? 0}</span>
-                  <span className="text-xs text-slate-400 block mt-1 font-semibold">
-                    Equivalent to ₹{((balance ?? 0) / 10).toFixed(2)} off
+                  <span className="text-4xl font-mono font-bold text-primary-dark">{balance ?? 0}</span>
+                  <span className="text-xs text-ink/60 block mt-1 font-sans">
+                    Equivalent to <span className="font-mono">₹{((balance ?? 0) / 10).toFixed(2)}</span> off
                   </span>
                 </div>
               </div>
 
               {/* Rules/Info Card */}
-              <div className="p-6 rounded-3xl bg-slate-900/20 border border-slate-900 hover:border-slate-850 transition-all md:col-span-2 space-y-4 backdrop-blur-xl">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-350 flex items-center gap-1.5">
-                  <Info className="h-4.5 w-4.5 text-teal-400" />
+              <div className="p-6 rounded bg-white border border-primary-dark/15 hover:border-accent/30 transition-colors md:col-span-2 space-y-4 shadow-xxs">
+                <h3 className="text-xs font-mono font-bold text-accent uppercase tracking-wider flex items-center gap-1.5 border-b border-primary-dark/10 pb-3">
+                  <Info className="h-4.5 w-4.5 text-accent" />
                   Program Benefits & Rules
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-400">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs font-sans text-ink">
                   <div className="flex items-start gap-2.5">
-                    <div className="p-1 bg-slate-950 rounded-lg text-teal-400 mt-0.5">
+                    <div className="p-1 bg-paper border border-primary-dark/10 rounded text-accent mt-0.5">
                       <TrendingUp className="h-3.5 w-3.5" />
                     </div>
                     <div>
-                      <p className="text-slate-200">Earning points</p>
-                      <p className="text-xxs text-slate-500 font-medium">Earn 1 loyalty point for every ₹100 spent on completed orders.</p>
+                      <p className="font-serif font-bold text-primary-dark">Earning points</p>
+                      <p className="text-[10px] text-ink/65 leading-relaxed mt-0.5">Earn 1 loyalty point for every ₹100 spent on completed orders.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2.5">
-                    <div className="p-1 bg-slate-950 rounded-lg text-teal-400 mt-0.5">
+                    <div className="p-1 bg-paper border border-primary-dark/10 rounded text-accent mt-0.5">
                       <Gift className="h-3.5 w-3.5" />
                     </div>
                     <div>
-                      <p className="text-slate-200">Redeeming points</p>
-                      <p className="text-xxs text-slate-500 font-medium">Redeem points at checkout (10 points = ₹1 off). Minimum 100 points required to redeem.</p>
+                      <p className="font-serif font-bold text-primary-dark">Redeeming points</p>
+                      <p className="text-[10px] text-ink/65 leading-relaxed mt-0.5">Redeem points at checkout (10 points = ₹1 off). Min 100 points required to redeem.</p>
                     </div>
                   </div>
                 </div>
@@ -127,51 +127,51 @@ export default function LoyaltyDashboardPage() {
 
             {/* History Table */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <History className="h-5 w-5 text-teal-400" />
+              <h3 className="text-lg font-bold font-serif text-primary-dark flex items-center gap-2">
+                <History className="h-4.5 w-4.5 text-accent" />
                 Points Transaction History
               </h3>
 
               {history.length === 0 ? (
-                <div className="p-12 text-center rounded-3xl border border-dashed border-slate-800 bg-slate-900/10 space-y-2">
-                  <p className="text-sm text-slate-500">No point transactions found.</p>
-                  <p className="text-xxs text-slate-655 max-w-xs mx-auto">Place your first order to start earning points!</p>
+                <div className="p-12 text-center rounded bg-white border border-primary-dark/15 space-y-2 shadow-xxs">
+                  <p className="text-xs text-ink/50 font-sans">No point transactions found.</p>
+                  <p className="text-[10px] text-ink/40 font-mono">Place your first order to start earning points!</p>
                 </div>
               ) : (
-                <div className="overflow-hidden border border-slate-900 rounded-3xl bg-slate-900/10 backdrop-blur-xl">
+                <div className="overflow-hidden border border-primary-dark/15 rounded bg-white shadow-xxs">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-900 text-xs">
+                    <table className="min-w-full divide-y divide-primary-dark/10 text-xs">
                       <thead>
-                        <tr className="bg-slate-950/40 text-slate-450 uppercase font-bold tracking-wider text-left">
-                          <th className="px-6 py-4">Transaction Details</th>
-                          <th className="px-6 py-4">Reason</th>
-                          <th className="px-6 py-4">Points Change</th>
-                          <th className="px-6 py-4">Balance After</th>
+                        <tr className="bg-paper/85 text-accent font-mono font-bold text-[10px] uppercase tracking-wider text-left border-b border-primary-dark/10">
+                          <th className="px-6 py-3.5">Transaction Details</th>
+                          <th className="px-6 py-3.5">Reason</th>
+                          <th className="px-6 py-3.5">Points Change</th>
+                          <th className="px-6 py-3.5">Balance After</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-900 font-medium">
+                      <tbody className="divide-y divide-primary-dark/10 font-sans text-ink/80">
                         {history.map((tx) => {
                           const isPositive = tx.points_change > 0;
                           return (
-                            <tr key={tx.id} className="hover:bg-slate-900/10 transition-colors">
-                              <td className="px-6 py-4 text-slate-350">
+                            <tr key={tx.id} className="hover:bg-paper/40 transition-colors">
+                              <td className="px-6 py-4 text-ink/60">
                                 <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1.5 text-slate-200">
-                                    <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                                  <div className="flex items-center gap-1.5 text-primary-dark font-mono text-xs">
+                                    <Calendar className="h-3.5 w-3.5 text-accent" />
                                     <span>{new Date(tx.created_at).toLocaleDateString()}</span>
                                   </div>
                                   {tx.order_id && (
-                                    <span className="text-[10px] text-slate-550 block">
-                                      Order Ref: #OR-{tx.order_id}
+                                    <span className="text-[10px] text-ink/40 block font-mono">
+                                      ORDER REF: #OR-{tx.order_id}
                                     </span>
                                   )}
                                 </div>
                               </td>
-                              <td className="px-6 py-4 text-slate-300">
+                              <td className="px-6 py-4 font-medium">
                                 {getReasonLabel(tx.reason)}
                               </td>
-                              <td className="px-6 py-4 font-bold text-sm">
-                                <span className={`inline-flex items-center gap-1 ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              <td className="px-6 py-4 font-mono font-bold text-sm">
+                                <span className={`inline-flex items-center gap-1 ${isPositive ? 'text-accent' : 'text-rose-600'}`}>
                                   {isPositive ? (
                                     <>
                                       <PlusCircle className="h-4 w-4" />
@@ -185,7 +185,7 @@ export default function LoyaltyDashboardPage() {
                                   )}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 text-slate-400 font-bold">
+                              <td className="px-6 py-4 text-primary-dark font-mono font-bold">
                                 {tx.balance_after} pts
                               </td>
                             </tr>
@@ -201,9 +201,9 @@ export default function LoyaltyDashboardPage() {
         )}
       </main>
 
-      <footer className="border-t border-slate-900 bg-slate-950 py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-600 flex items-center justify-center gap-2">
-          <Activity className="h-4 w-4 text-teal-400/50" />
+      <footer className="border-t border-primary-dark/10 bg-primary-dark py-8 mt-12 text-paper/70 font-sans">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs flex items-center justify-center gap-2">
+          <Activity className="h-4 w-4 text-highlight" />
           <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Loyalty Hub · 2026</span>
         </div>
       </footer>

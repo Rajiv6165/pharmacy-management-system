@@ -45,23 +45,23 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col min-h-screen bg-paper text-ink font-sans">
       <CustomerNavigation />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold font-serif tracking-tight text-primary-dark sm:text-4xl">
             Medicines & Catalog
           </h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-1 text-xs text-ink/70">
             Browse our verified inventory of prescription drugs and general healthcare products.
           </p>
         </div>
 
         {isBackendOffline ? (
-          <div className="p-12 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-center space-y-3">
-            <h3 className="font-extrabold text-amber-400 text-xl">Database Connection Offline</h3>
-            <p className="text-slate-400 max-w-md mx-auto text-sm">
+          <div className="p-12 rounded border border-highlight bg-highlight/5 text-center space-y-3">
+            <h3 className="font-serif font-bold text-primary-dark text-lg">Database Connection Offline</h3>
+            <p className="text-xs font-mono text-ink/65 max-w-md mx-auto">
               We cannot load the pharmacy catalog at the moment. Please check if the FastAPI database service is running locally on port 8000.
             </p>
           </div>
@@ -69,7 +69,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             {/* Filter Panel (Left) */}
             <div className="lg:col-span-1">
-              <Suspense fallback={<div className="h-64 bg-slate-900/30 rounded-3xl animate-pulse" />}>
+              <Suspense fallback={<div className="h-64 bg-white border border-primary-dark/10 rounded animate-pulse" />}>
                 <CatalogFilters categories={categories} />
               </Suspense>
             </div>
@@ -77,12 +77,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {/* Products Grid (Right) */}
             <div className="lg:col-span-3 space-y-6">
               {products.length === 0 ? (
-                <div className="p-20 text-center rounded-3xl border border-dashed border-slate-800 bg-slate-900/10 space-y-4">
-                  <div className="p-4 bg-slate-900/50 rounded-full inline-block text-slate-600">
+                <div className="p-20 text-center rounded bg-white border border-primary-dark/15 space-y-4 shadow-xxs">
+                  <div className="p-4 bg-paper rounded-full inline-block text-accent border border-primary-dark/10">
                     <ShoppingBag className="h-10 w-10" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-300">No Products Found</h3>
-                  <p className="text-sm text-slate-500 max-w-xs mx-auto">
+                  <h3 className="text-xl font-bold font-serif text-primary-dark">No Products Found</h3>
+                  <p className="text-xs text-ink/60 max-w-xs mx-auto">
                     Try updating your search query or choosing another category in the filters panel.
                   </p>
                 </div>
@@ -99,9 +99,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </main>
 
       {/* Mini Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-600 flex items-center justify-center gap-2">
-          <Activity className="h-4 w-4 text-teal-400/50" />
+      <footer className="border-t border-primary-dark/10 bg-primary-dark py-8 pb-24 text-paper/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs flex items-center justify-center gap-2">
+          <Activity className="h-4 w-4 text-highlight" />
           <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Pharmacy Shop Catalogue · 2026</span>
         </div>
       </footer>

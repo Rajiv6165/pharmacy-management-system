@@ -240,7 +240,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col min-h-screen bg-paper text-ink font-sans">
       <CustomerNavigation />
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
@@ -249,28 +249,28 @@ export default function CheckoutPage() {
           
           {/* Checkout Steps (Left) */}
           <div className="lg:col-span-2 space-y-6">
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">Checkout</h1>
+            <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight">Checkout</h1>
 
             {error && (
-              <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-450 text-sm rounded-2xl">
+              <div className="p-4 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded font-mono uppercase tracking-wider">
                 {error}
               </div>
             )}
 
             {/* Step 1: Delivery Mode */}
-            <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-4 backdrop-blur-xl">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-teal-400" />
+            <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
+              <h3 className="text-base font-serif font-bold text-primary-dark flex items-center gap-2">
+                <CheckCircle2 className="h-4.5 w-4.5 text-accent" />
                 1. Delivery Method
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 font-sans">
                 <button
                   type="button"
                   onClick={() => setDeliveryType('delivery')}
-                  className={`p-4 rounded-2xl border text-center font-bold text-sm cursor-pointer transition-all ${
+                  className={`p-3.5 rounded border text-center font-bold text-xs cursor-pointer transition-colors uppercase tracking-wider ${
                     deliveryType === 'delivery'
-                      ? 'bg-teal-500/10 border-teal-500/40 text-teal-400'
-                      : 'bg-slate-950/20 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-accent/10 border-accent/40 text-accent'
+                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
                   }`}
                 >
                   Home Delivery
@@ -278,10 +278,10 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setDeliveryType('pickup')}
-                  className={`p-4 rounded-2xl border text-center font-bold text-sm cursor-pointer transition-all ${
+                  className={`p-3.5 rounded border text-center font-bold text-xs cursor-pointer transition-colors uppercase tracking-wider ${
                     deliveryType === 'pickup'
-                      ? 'bg-teal-500/10 border-teal-500/40 text-teal-400'
-                      : 'bg-slate-950/20 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-accent/10 border-accent/40 text-accent'
+                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
                   }`}
                 >
                   Store Pickup
@@ -291,30 +291,30 @@ export default function CheckoutPage() {
 
             {/* Step 2: Address Selection */}
             {deliveryType === 'delivery' && (
-              <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-4 backdrop-blur-xl">
+              <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-teal-400" />
+                  <h3 className="text-base font-serif font-bold text-primary-dark flex items-center gap-2">
+                    <MapPin className="h-4.5 w-4.5 text-accent" />
                     2. Delivery Address
                   </h3>
                   <button
                     type="button"
                     onClick={() => router.push('/account/addresses')}
-                    className="text-xs font-bold text-teal-400 hover:underline flex items-center"
+                    className="text-xs font-mono font-bold text-accent hover:underline flex items-center gap-0.5"
                   >
-                    Manage Addresses <ChevronRight className="h-3 w-3" />
+                    MANAGE ADDRESSES <ChevronRight className="h-3 w-3" />
                   </button>
                 </div>
 
                 {loadingAddresses ? (
-                  <div className="h-20 bg-slate-950/40 rounded-2xl animate-pulse" />
+                  <div className="h-20 bg-paper/30 rounded animate-pulse" />
                 ) : addresses.length === 0 ? (
-                  <div className="p-6 text-center border border-dashed border-slate-800 rounded-2xl bg-slate-950/20">
-                    <p className="text-xs text-slate-500 mb-3">No addresses found.</p>
+                  <div className="p-6 text-center border border-dashed border-primary-dark/15 rounded bg-paper/20">
+                    <p className="text-xs text-ink/50 mb-3 font-sans">No addresses found in your profile.</p>
                     <button
                       type="button"
                       onClick={() => router.push('/account/addresses')}
-                      className="py-2.5 px-4 bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold text-xs rounded-xl"
+                      className="py-2 px-4 bg-accent hover:bg-accent/90 text-white font-sans font-bold text-xs rounded shadow-sm"
                     >
                       Add New Address
                     </button>
@@ -325,10 +325,10 @@ export default function CheckoutPage() {
                       <label
                         key={addr.id}
                         onClick={() => setAddressId(addr.id)}
-                        className={`p-4 rounded-2xl border flex items-start gap-3 cursor-pointer transition-all ${
+                        className={`p-4 rounded border flex items-start gap-3 cursor-pointer transition-colors ${
                           addressId === addr.id
-                            ? 'bg-teal-500/5 border-teal-500/30 text-slate-200'
-                            : 'bg-slate-950/10 border-slate-900 hover:border-slate-800'
+                            ? 'bg-accent/5 border-accent/30 text-ink'
+                            : 'bg-paper/10 border-primary-dark/10 hover:border-primary-dark/25'
                         }`}
                       >
                         <input
@@ -336,18 +336,18 @@ export default function CheckoutPage() {
                           name="address"
                           checked={addressId === addr.id}
                           onChange={() => setAddressId(addr.id)}
-                          className="mt-1 h-4 w-4 border-slate-800 text-teal-500 focus:ring-teal-500/50"
+                          className="mt-1 h-4 w-4 border-primary-dark/25 text-accent focus:ring-accent cursor-pointer"
                         />
                         <div className="space-y-1">
-                          <span className="text-xxs font-bold text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2 py-0.5 rounded uppercase">
+                          <span className="text-[9px] font-mono font-bold text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded uppercase">
                             {addr.label}
                           </span>
-                          <p className="text-xs font-semibold leading-relaxed pt-1">
+                          <p className="text-xs font-semibold leading-relaxed pt-1 text-ink">
                             {addr.full_address}
                           </p>
                           {addr.landmark && (
-                            <span className="text-xxs text-slate-550 block">
-                              Landmark: {addr.landmark}
+                            <span className="text-[10px] text-ink/50 block font-mono">
+                              LANDMARK: {addr.landmark}
                             </span>
                           )}
                         </div>
@@ -359,50 +359,50 @@ export default function CheckoutPage() {
             )}
 
             {/* Step 3: Payment Option */}
-            <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-4 backdrop-blur-xl">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-teal-400" />
+            <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
+              <h3 className="text-base font-serif font-bold text-primary-dark flex items-center gap-2">
+                <CreditCard className="h-4.5 w-4.5 text-accent" />
                 {deliveryType === 'delivery' ? '3.' : '2.'} Payment Option
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('cod')}
-                  className={`p-4 rounded-2xl border text-center font-bold text-sm cursor-pointer transition-all flex flex-col items-center gap-2 ${
+                  className={`p-4 rounded border text-center font-bold text-xs cursor-pointer transition-colors flex flex-col items-center gap-2 uppercase tracking-wider ${
                     paymentMethod === 'cod'
-                      ? 'bg-teal-500/10 border-teal-500/40 text-teal-400'
-                      : 'bg-slate-950/20 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-accent/10 border-accent/40 text-accent'
+                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
                   }`}
                 >
-                  <DollarSign className="h-5 w-5" />
+                  <DollarSign className="h-4.5 w-4.5" />
                   {deliveryType === 'delivery' ? 'Cash on Delivery' : 'Pay at Counter'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('online')}
-                  className={`p-4 rounded-2xl border text-center font-bold text-sm cursor-pointer transition-all flex flex-col items-center gap-2 ${
+                  className={`p-4 rounded border text-center font-bold text-xs cursor-pointer transition-colors flex flex-col items-center gap-2 uppercase tracking-wider ${
                     paymentMethod === 'online'
-                      ? 'bg-teal-500/10 border-teal-500/40 text-teal-400'
-                      : 'bg-slate-950/20 border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-accent/10 border-accent/40 text-accent'
+                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
                   }`}
                 >
-                  <CreditCard className="h-5 w-5" />
+                  <CreditCard className="h-4.5 w-4.5" />
                   Pay Online
                 </button>
               </div>
             </div>
 
             {/* Step 4: Coupons & Loyalty */}
-            <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-4 backdrop-blur-xl">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Gift className="h-5 w-5 text-teal-400" />
+            <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
+              <h3 className="text-base font-serif font-bold text-primary-dark flex items-center gap-2">
+                <Gift className="h-4.5 w-4.5 text-accent" />
                 {deliveryType === 'delivery' ? '4.' : '3.'} Coupons & Loyalty Rewards
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Coupons */}
-                <div className="p-5 rounded-2xl bg-slate-950/40 border border-slate-900 space-y-3">
-                  <span className="text-xxs font-bold text-slate-500 uppercase tracking-wider block">
+                <div className="p-5 rounded bg-paper/40 border border-primary-dark/10 space-y-3">
+                  <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">
                     Promo Coupon Code
                   </span>
                   <div className="flex gap-2">
@@ -411,32 +411,32 @@ export default function CheckoutPage() {
                       placeholder="e.g. WELCOME10"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      className="flex-grow px-3 py-2 border border-slate-800 rounded-xl bg-slate-900/20 text-slate-200 uppercase placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-teal-500/50 text-xs font-bold"
+                      className="flex-grow px-3 py-2 border border-primary-dark/15 rounded bg-white text-ink uppercase placeholder-ink/40 focus:outline-none focus:ring-1 focus:ring-accent text-xs font-bold font-mono"
                     />
                     <button
                       type="button"
                       onClick={handleApplyCoupon}
                       disabled={validatingCoupon}
-                      className="px-4 py-2 bg-teal-450 hover:bg-teal-400 disabled:opacity-40 text-slate-950 rounded-xl text-xs font-extrabold cursor-pointer transition-colors"
+                      className="px-4 py-2 bg-accent hover:bg-accent/90 disabled:opacity-40 text-white rounded text-xs font-bold cursor-pointer transition-colors shadow-xxs border border-transparent"
                     >
                       {validatingCoupon ? '...' : 'Apply'}
                     </button>
                   </div>
                   {couponError && (
-                    <p className="text-xxs text-rose-400 font-semibold">{couponError}</p>
+                    <p className="text-[10px] text-rose-600 font-semibold font-mono">{couponError}</p>
                   )}
                   {couponSuccess && (
-                    <p className="text-xxs text-emerald-405 font-semibold">{couponSuccess}</p>
+                    <p className="text-[10px] text-accent font-semibold font-mono">{couponSuccess}</p>
                   )}
                 </div>
 
                 {/* Loyalty */}
-                <div className="p-5 rounded-2xl bg-slate-950/40 border border-slate-900 space-y-3">
+                <div className="p-5 rounded bg-paper/40 border border-primary-dark/10 space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-xxs font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider">
                       Redeem Points
                     </span>
-                    <span className="text-xxs font-extrabold text-teal-400">
+                    <span className="text-[10px] font-mono font-bold text-accent">
                       Balance: {loyaltyPoints} pts
                     </span>
                   </div>
@@ -450,18 +450,18 @@ export default function CheckoutPage() {
                         const val = parseInt(e.target.value) || 0;
                         setPointsToRedeem(Math.min(val, loyaltyPoints));
                       }}
-                      className="flex-grow px-3 py-2 border border-slate-800 rounded-xl bg-slate-900/20 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-teal-500/50 text-xs font-bold"
+                      className="flex-grow px-3 py-2 border border-primary-dark/15 rounded bg-white text-ink placeholder-ink/40 focus:outline-none focus:ring-1 focus:ring-accent text-xs font-bold font-mono"
                     />
                     <button
                       type="button"
                       onClick={handleApplyMaxPoints}
-                      className="px-3 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-350 hover:text-white rounded-xl text-xs font-extrabold cursor-pointer transition-colors"
+                      className="px-3 py-2 bg-white hover:bg-paper border border-primary-dark/15 text-ink/70 hover:text-primary-dark rounded text-xs font-bold cursor-pointer transition-colors shadow-xxs"
                     >
                       Use Max
                     </button>
                   </div>
 
-                  <p className="text-[10px] text-slate-500 font-semibold leading-tight">
+                  <p className="text-[9px] text-ink/50 font-mono leading-tight">
                     Min 100 points required. 10 points = ₹1.00 discount.
                   </p>
                 </div>
@@ -470,44 +470,44 @@ export default function CheckoutPage() {
 
             {/* Step 5: Prescription File Upload */}
             {requiresRx && (
-              <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-4 backdrop-blur-xl">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-teal-400" />
+              <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
+                <h3 className="text-base font-serif font-bold text-primary-dark flex items-center gap-2">
+                  <FileText className="h-4.5 w-4.5 text-accent" />
                   {deliveryType === 'delivery' ? '5.' : '4.'} Upload Doctor Prescription
                 </h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-ink/65 leading-relaxed font-sans">
                   Your order contains regulated medications that require medical validation. Upload a clear photograph or digital PDF of your doctor prescription.
                 </p>
 
-                <div className="relative border border-dashed border-slate-850 rounded-2xl bg-slate-950/20 p-6 flex flex-col items-center justify-center text-center hover:border-teal-500/40 transition-colors">
+                <div className="relative border border-dashed border-primary-dark/25 rounded bg-paper/20 p-6 flex flex-col items-center justify-center text-center hover:border-accent/40 transition-colors">
                   <input
                     type="file"
                     required
                     accept="image/*,.pdf"
                     onChange={handleFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    className="absolute inset-0 opacity-0 cursor-pointer z-20"
                   />
-                  <div className="p-3 bg-teal-500/10 rounded-full text-teal-400 mb-3">
+                  <div className="p-3 bg-accent/10 rounded-full text-accent mb-3 border border-accent/20">
                     <Upload className="h-6 w-6" />
                   </div>
                   {rxFile ? (
                     <div className="space-y-1">
-                      <span className="text-xs font-bold text-white block">
+                      <span className="text-xs font-mono font-bold text-ink block">
                         Selected File:
                       </span>
-                      <span className="text-xs text-teal-400 font-semibold break-all">
+                      <span className="text-xs text-accent font-mono font-bold break-all">
                         {rxFile.name}
                       </span>
-                      <span className="text-xxs text-slate-500 block">
+                      <span className="text-[10px] text-ink/40 block font-mono">
                         ({(rxFile.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                     </div>
                   ) : (
                     <div>
-                      <span className="text-xs font-bold text-slate-300 block">
+                      <span className="text-xs font-serif font-bold text-primary-dark block">
                         Click to select or drag PDF / Image
                       </span>
-                      <span className="text-xxs text-slate-500 block mt-1">
+                      <span className="text-[10px] text-ink/40 block mt-1 font-mono">
                         Max file size: 5MB
                       </span>
                     </div>
@@ -519,71 +519,71 @@ export default function CheckoutPage() {
 
           {/* Checkout Panel Summary (Right) */}
           <div className="space-y-6 lg:mt-14">
-            <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-6 backdrop-blur-xl">
-              <h3 className="text-lg font-bold text-white border-b border-slate-900 pb-3">
+            <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-6 shadow-xxs">
+              <h3 className="text-lg font-serif font-bold text-primary-dark border-b border-primary-dark/10 pb-3">
                 Order Review
               </h3>
 
               {/* Items Summary list */}
               <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
                 {cartItems.map((item) => (
-                  <div key={item.product.id} className="flex justify-between text-xs">
+                  <div key={item.product.id} className="flex justify-between text-xs font-sans">
                     <div className="max-w-[70%]">
-                      <span className="font-bold text-slate-200 block line-clamp-1">
+                      <span className="font-serif font-bold text-primary-dark block line-clamp-1">
                         {item.product.name}
                       </span>
-                      <span className="text-slate-500">
+                      <span className="text-ink/50 text-[10px] font-mono">
                         Qty: {item.quantity} · {item.product.unit}
                       </span>
                     </div>
-                    <span className="font-extrabold text-slate-300">
+                    <span className="font-mono font-bold text-primary-dark">
                       ₹{(Number(item.product.price) * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <hr className="border-slate-900" />
+              <hr className="border-primary-dark/10" />
 
-              <div className="space-y-3 text-xs font-semibold text-slate-450">
+              <div className="space-y-3 text-xs font-semibold text-ink/70 font-sans">
                 <div className="flex justify-between">
                   <span>Cart Items Subtotal</span>
-                  <span className="text-slate-200">₹{Number(cartTotal).toFixed(2)}</span>
+                  <span className="font-mono text-primary-dark">₹{Number(cartTotal).toFixed(2)}</span>
                 </div>
                 {couponDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-400 font-bold">
-                    <span>Coupon Applied</span>
-                    <span>-₹{couponDiscount.toFixed(2)}</span>
+                  <div className="flex justify-between text-accent font-bold">
+                    <span>Coupon Discount</span>
+                    <span className="font-mono">-₹{couponDiscount.toFixed(2)}</span>
                   </div>
                 )}
                 {pointsDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-400 font-bold">
-                    <span>Points Redeemed ({pointsToRedeem} pts)</span>
-                    <span>-₹{pointsDiscount.toFixed(2)}</span>
+                  <div className="flex justify-between text-accent font-bold">
+                    <span>Points Discount ({pointsToRedeem} pts)</span>
+                    <span className="font-mono">-₹{pointsDiscount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-baseline pt-3 border-t border-slate-900">
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                <div className="flex justify-between items-baseline pt-3 border-t border-primary-dark/10">
+                  <span className="text-xs text-ink/65 font-bold uppercase tracking-wider">
                     Total Pay
                   </span>
-                  <span className="text-2xl font-black text-teal-400">
+                  <span className="text-2xl font-mono font-bold text-accent">
                     ₹{finalPayable.toFixed(2)}
                   </span>
                 </div>
                 
                 {finalPayable > 0 && (
-                  <p className="text-[10px] text-slate-550 pt-2 text-center">
-                    You will earn approximately {Math.floor(finalPayable / 100)} loyalty points on this order.
+                  <p className="text-[9px] text-ink/40 pt-2 text-center font-mono leading-tight">
+                    You will earn approx. {Math.floor(finalPayable / 100)} loyalty points on checkout.
                   </p>
                 )}
               </div>
 
               {/* Security Badge */}
-              <div className="flex gap-2.5 p-4 bg-slate-950/40 border border-slate-900 rounded-2xl">
-                <ShieldCheck className="h-5 w-5 text-teal-400 flex-shrink-0" />
+              <div className="flex gap-2.5 p-4 bg-paper/40 border border-primary-dark/10 rounded">
+                <ShieldCheck className="h-5 w-5 text-accent flex-shrink-0" />
                 <div className="space-y-0.5">
-                  <h4 className="text-xxs font-bold text-white">Security & FDA Compliance</h4>
-                  <p className="text-[10px] text-slate-500 leading-normal">
+                  <h4 className="text-[11px] font-serif font-bold text-primary-dark">Security & FDA Compliance</h4>
+                  <p className="text-[9px] text-ink/50 leading-relaxed font-sans">
                     Prescriptions are securely encrypted. Orders remain locked until verified by an on-duty licensed pharmacist.
                   </p>
                 </div>
@@ -592,7 +592,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full flex items-center justify-center gap-2 py-4 border border-transparent rounded-2xl text-sm font-extrabold text-slate-950 bg-teal-400 hover:bg-teal-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all duration-300 shadow-lg shadow-teal-500/20"
+                className="w-full flex items-center justify-center gap-2 py-3 border border-transparent rounded text-sm font-sans font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors shadow-sm"
               >
                 {submitting ? 'Placing Order...' : 'Pay & Confirm Order'}
               </button>

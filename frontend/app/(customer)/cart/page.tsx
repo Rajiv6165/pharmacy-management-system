@@ -22,32 +22,32 @@ export default function CartPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col min-h-screen bg-paper text-ink font-sans">
       <CustomerNavigation />
 
       <main className="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold font-serif tracking-tight text-primary-dark sm:text-4xl">
             Shopping Cart
           </h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-1 text-xs text-ink/70">
             Review your selected medicines and adjust quantities before placing the order.
           </p>
         </div>
 
         {cartItems.length === 0 ? (
-          <div className="p-20 text-center rounded-3xl border border-dashed border-slate-800 bg-slate-900/10 space-y-4">
-            <div className="p-4 bg-slate-900/50 rounded-full inline-block text-slate-600">
+          <div className="p-20 text-center rounded bg-white border border-primary-dark/15 space-y-4 shadow-xxs">
+            <div className="p-4 bg-paper rounded-full inline-block text-accent border border-primary-dark/10">
               <ShoppingBag className="h-10 w-10" />
             </div>
-            <h3 className="text-xl font-bold text-slate-300">Your Cart is Empty</h3>
-            <p className="text-sm text-slate-500 max-w-xs mx-auto">
+            <h3 className="text-xl font-bold font-serif text-primary-dark">Your Cart is Empty</h3>
+            <p className="text-xs text-ink/60 max-w-xs mx-auto">
               It looks like you haven't added any products to your cart yet. Explore our medicines catalog to get started.
             </p>
             <div className="pt-2">
               <Link
                 href="/products"
-                className="inline-block py-3 px-6 bg-teal-400 hover:bg-teal-300 text-slate-950 rounded-xl text-sm font-bold transition-all shadow-md shadow-teal-500/10"
+                className="inline-block py-2.5 px-5 bg-accent hover:bg-accent/90 text-white rounded text-xs font-bold transition-all shadow-sm"
               >
                 Browse Medicines
               </Link>
@@ -67,16 +67,16 @@ export default function CartPage() {
                 return (
                   <div
                     key={item.product.id}
-                    className="p-5 rounded-2xl bg-slate-900/20 border border-slate-900 hover:border-slate-850 transition-all flex items-center justify-between gap-4"
+                    className="p-5 rounded bg-white border border-primary-dark/15 hover:border-accent/30 transition-colors flex items-center justify-between gap-4 shadow-xxs"
                   >
                     {/* Item details */}
                     <div className="flex-grow space-y-1.5 max-w-[60%]">
                       <div className="flex items-center gap-2">
-                        <span className="text-xxs text-slate-500 font-bold uppercase tracking-wider">
+                        <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider">
                           {item.product.brand}
                         </span>
                         {item.product.requires_rx && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xxs font-semibold text-teal-400 bg-teal-500/10 border border-teal-500/20">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold text-primary-dark bg-highlight border border-primary-dark/10 uppercase">
                             <FileText className="h-3 w-3" />
                             Rx
                           </span>
@@ -84,33 +84,33 @@ export default function CartPage() {
                       </div>
                       <Link
                         href={`/products/${item.product.id}`}
-                        className="font-bold text-slate-100 hover:text-teal-400 transition-colors text-base block line-clamp-1"
+                        className="font-serif font-bold text-primary-dark hover:text-accent transition-colors text-base block line-clamp-1"
                       >
                         {item.product.name}
                       </Link>
-                      <p className="text-xs text-slate-400">
-                        Unit: {item.product.unit} · ₹{Number(item.product.price).toFixed(2)}/unit
+                      <p className="text-xs text-ink/65 font-sans">
+                        Unit: {item.product.unit} · <span className="font-mono">₹{Number(item.product.price).toFixed(2)}</span> / unit
                       </p>
                     </div>
 
                     {/* Quantity selectors */}
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center border border-slate-850 rounded-xl bg-slate-950/20 p-1">
+                      <div className="flex items-center border border-primary-dark/15 rounded bg-paper/30 p-0.5">
                         <button
                           type="button"
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                          className="p-1 rounded-lg text-slate-500 hover:text-white hover:bg-slate-900 transition-all cursor-pointer"
+                          className="p-1 rounded text-ink/75 hover:text-primary-dark hover:bg-paper/85 transition-colors cursor-pointer"
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
-                        <span className="px-3 text-sm font-bold text-white select-none">
+                        <span className="px-3 text-xs font-mono font-bold text-primary-dark select-none">
                           {item.quantity}
                         </span>
                         <button
                           type="button"
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                           disabled={isMaxReached}
-                          className="p-1 rounded-lg text-slate-500 hover:text-white hover:bg-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                          className="p-1 rounded text-ink/75 hover:text-primary-dark hover:bg-paper/85 disabled:opacity-25 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                           <Plus className="h-3.5 w-3.5" />
                         </button>
@@ -119,20 +119,20 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.product.id)}
-                        className="p-2 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
+                        className="p-2 text-ink/40 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
                         title="Remove item"
                       >
-                        <Trash2 className="h-5 w-5" />
+                        <Trash2 className="h-4.5 w-4.5" />
                       </button>
                     </div>
 
                     {/* Total Price */}
                     <div className="text-right min-w-[70px]">
-                      <span className="font-extrabold text-white text-base block">
+                      <span className="font-mono font-bold text-primary-dark text-base block">
                         ₹{(Number(item.product.price) * item.quantity).toFixed(2)}
                       </span>
                       {discount > 0 && (
-                        <span className="text-xxs text-teal-400 font-bold block">
+                        <span className="text-[10px] font-mono text-accent font-bold block">
                           Saved {discount}%
                         </span>
                       )}
@@ -144,23 +144,23 @@ export default function CartPage() {
 
             {/* Summary & Checkout Actions (Right) */}
             <div className="space-y-6">
-              <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-6 space-y-6 backdrop-blur-xl">
-                <h3 className="text-lg font-bold text-white border-b border-slate-900 pb-3">
+              <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-6 shadow-xxs">
+                <h3 className="text-lg font-serif font-bold text-primary-dark border-b border-primary-dark/10 pb-3">
                   Order Summary
                 </h3>
 
                 {/* Sub-totals list */}
                 <div className="space-y-3">
-                  <div className="flex justify-between text-sm text-slate-400">
+                  <div className="flex justify-between text-xs text-ink/70 font-sans">
                     <span>Items Count</span>
-                    <span className="font-bold text-slate-200">
-                      {cartItems.reduce((acc, item) => acc + item.quantity, 0)} items
+                    <span className="font-mono font-bold text-primary-dark">
+                      {cartItems.reduce((acc, item) => acc + item.quantity, 0)} units
                     </span>
                   </div>
-                  <hr className="border-slate-900" />
+                  <hr className="border-primary-dark/10" />
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm text-slate-400 font-medium">Grand Total</span>
-                    <span className="text-2xl font-black text-teal-400">
+                    <span className="text-xs text-ink/70 font-medium font-sans">Grand Total</span>
+                    <span className="text-2xl font-mono font-bold text-accent">
                       ₹{Number(cartTotal).toFixed(2)}
                     </span>
                   </div>
@@ -168,11 +168,11 @@ export default function CartPage() {
 
                 {/* Rx Warning Banner */}
                 {requiresRx && (
-                  <div className="p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl flex items-start gap-3">
-                    <FileText className="h-5 w-5 text-teal-400 flex-shrink-0 mt-0.5" />
+                  <div className="p-4 bg-highlight/10 border border-highlight/20 rounded flex items-start gap-3">
+                    <FileText className="h-4.5 w-4.5 text-highlight flex-shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-white">Prescription Upload Required</h4>
-                      <p className="text-xxs text-slate-400 leading-normal">
+                      <h4 className="text-xs font-serif font-bold text-primary-dark">Prescription Required</h4>
+                      <p className="text-[10px] text-ink/65 leading-relaxed font-sans">
                         Your cart contains prescription-only items. You will need to upload a doctor prescription PDF or image file during checkout.
                       </p>
                     </div>
@@ -182,7 +182,7 @@ export default function CartPage() {
                 {/* Checkout Trigger */}
                 <button
                   onClick={handleCheckoutRedirect}
-                  className="w-full flex items-center justify-center gap-2 py-4 px-6 border border-transparent rounded-2xl text-sm font-extrabold text-slate-950 bg-teal-400 hover:bg-teal-300 transition-all duration-300 shadow-lg shadow-teal-500/20 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-6 border border-transparent rounded text-sm font-sans font-bold text-white bg-accent hover:bg-accent/90 transition-colors shadow-sm cursor-pointer"
                 >
                   Proceed to Checkout
                   <ArrowRight className="h-4 w-4" />
@@ -194,9 +194,9 @@ export default function CartPage() {
       </main>
 
       {/* Mini Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-600 flex items-center justify-center gap-2">
-          <Activity className="h-4 w-4 text-teal-400/50" />
+      <footer className="border-t border-primary-dark/10 bg-primary-dark py-8 text-paper/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs flex items-center justify-center gap-2">
+          <Activity className="h-4 w-4 text-highlight" />
           <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Pharmacy Shop Cart · 2026</span>
         </div>
       </footer>

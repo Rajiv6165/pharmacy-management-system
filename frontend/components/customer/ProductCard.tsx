@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/lib/types';
 import { ShoppingCart, FileText, AlertCircle, Check } from 'lucide-react';
+import ProductImage from '@/components/customer/ProductImage';
 
 interface ProductCardProps {
   product: Product;
@@ -28,95 +29,110 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group relative bg-slate-900/40 border border-slate-800/80 rounded-2xl overflow-hidden hover:border-teal-500/30 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:shadow-teal-500/2">
-      {/* Product Link wrapper */}
-      <Link href={`/products/${product.id}`} className="block flex-grow p-5">
-        {/* Badges container */}
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
-          {discount > 0 && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-black text-slate-950 bg-teal-400">
-              {discount}% OFF
-            </span>
-          )}
-          {product.requires_rx && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-teal-400 bg-teal-500/10 border border-teal-500/20">
-              <FileText className="h-3.5 w-3.5" />
-              Rx Required
-            </span>
-          )}
-        </div>
-
-        {/* Product Image placeholder */}
-        <div className="aspect-square w-full bg-slate-950/50 rounded-xl flex items-center justify-center text-slate-600 mb-4 overflow-hidden relative border border-slate-900 group-hover:border-slate-800 transition-colors">
-          {product.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img 
-              src={product.image_url.startsWith('http') ? product.image_url : `${process.env.NEXT_PUBLIC_API_URL}${product.image_url}`} 
-              alt={product.name}
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-              onError={(e) => {
-                // If fails, replace with default text
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
-          ) : null}
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/20 text-slate-700 font-medium uppercase text-xs tracking-wider">
-            {product.brand}
-          </div>
-        </div>
-
-        {/* Metadata */}
-        <div className="space-y-1">
-          <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider block">
-            {product.brand}
+    <div className="group relative bg-white border border-primary-dark/15 rounded-lg transition-all duration-300 flex flex-col justify-between p-5 hover:border-accent/40 hover:shadow-md">
+      {/* Category corner tab & Discount label */}
+      <div className="absolute top-0 right-4 z-10">
+        {product.requires_rx ? (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-b text-[10px] font-mono font-bold uppercase tracking-wider text-primary-dark bg-highlight border-x border-b border-primary-dark/10">
+            <FileText className="h-3 w-3" />
+            Rx Req
           </span>
-          <h3 className="font-bold text-slate-100 text-base line-clamp-1 group-hover:text-teal-400 transition-colors">
-            {product.name}
-          </h3>
-          <p className="text-xs text-slate-400">
-            Unit: {product.unit}
-          </p>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-1 rounded-b text-[10px] font-mono font-bold uppercase tracking-wider text-white bg-accent border-x border-b border-primary-dark/10">
+            OTC
+          </span>
+        )}
+      </div>
+
+      {/* Product Link wrapper */}
+      <Link href={`/products/${product.id}`} className="block flex-grow">
+        {/* Brand label */}
+        <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block mb-1">
+          {product.brand}
+        </span>
+        
+        {/* Product Title */}
+        <h3 className="font-sans font-bold text-ink text-base line-clamp-1 group-hover:text-accent transition-colors leading-tight pr-16 mb-3">
+          {product.name}
+        </h3>
+
+        {/* Product Image Wrapper */}
+        <div className="aspect-video w-full bg-paper/30 rounded border border-primary-dark/10 mb-4 overflow-hidden relative group-hover:border-primary-dark/20 transition-colors">
+          <ProductImage src={product.image_url} alt={product.name} brand={product.brand} />
         </div>
 
-        {/* Stock warning */}
-        {product.stock_qty <= product.low_stock_alert && product.stock_qty > 0 && (
-          <div className="flex items-center gap-1.5 text-xs text-amber-500 font-medium mt-2">
-            <AlertCircle className="h-3.5 w-3.5" />
-            Only {product.stock_qty} left in stock
-          </div>
-        )}
+        {/* Unit and Stock Details */}
+        <div className="space-y-1.5">
+          <p className="text-xs font-mono text-ink/60">
+            UNIT: <span className="font-bold text-ink/80">{product.unit}</span>
+          </p>
+
+          {/* Stock warning */}
+          {product.stock_qty <= product.low_stock_alert && product.stock_qty > 0 ? (
+            <div className="flex items-center gap-1 text-[11px] font-mono text-highlight font-bold">
+              <AlertCircle className="h-3 w-3" />
+              <span>STOCK: ONLY {product.stock_qty} LEFT</span>
+            </div>
+          ) : isOutOfStock ? (
+            <div className="flex items-center gap-1 text-[11px] font-mono text-rose-600 font-bold">
+              <AlertCircle className="h-3 w-3" />
+              <span>OUT OF STOCK</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-[11px] font-mono text-accent">
+              <span>STOCK: AVAILABLE ({product.stock_qty})</span>
+            </div>
+          )}
+        </div>
       </Link>
 
-      {/* Pricing & Add to Cart (Fixed height base) */}
-      <div className="p-5 pt-0 border-t border-slate-900/50 mt-auto flex items-center justify-between">
+      {/* Prescription-label perforated tear strip */}
+      <div className="relative my-4 flex items-center">
+        {/* Left half-circle notch — sits flush on card left edge */}
+        <div className="absolute -left-5 w-4 h-4 rounded-full bg-paper border border-primary-dark/15 flex-shrink-0" />
+        {/* Dashed perforation line */}
+        <div className="flex-1 border-t-2 border-dashed border-primary-dark/15 mx-2" />
+        {/* Right half-circle notch — sits flush on card right edge */}
+        <div className="absolute -right-5 w-4 h-4 rounded-full bg-paper border border-primary-dark/15 flex-shrink-0" />
+      </div>
+
+      {/* Pricing & Add to Cart */}
+      <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-lg font-extrabold text-white">
-            ₹{Number(product.price).toFixed(2)}
-          </span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg font-mono font-bold text-primary-dark">
+              ₹{Number(product.price).toFixed(2)}
+            </span>
+            {discount > 0 && (
+              <span className="text-[10px] font-mono font-bold text-accent bg-accent/10 px-1 rounded">
+                -{discount}%
+              </span>
+            )}
+          </div>
           {Number(product.mrp) > Number(product.price) && (
-            <span className="text-xs text-slate-500 line-through">
-              M.R.P. ₹{Number(product.mrp).toFixed(2)}
+            <span className="text-xxs font-mono text-ink/40 line-through">
+              MRP: ₹{Number(product.mrp).toFixed(2)}
             </span>
           )}
         </div>
 
         <div>
           {isOutOfStock ? (
-            <span className="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-950/60 border border-slate-900 text-slate-600 block">
-              Sold Out
+            <span className="text-[11px] font-mono font-bold px-2.5 py-1.5 rounded border border-primary-dark/10 bg-paper/40 text-ink/45 select-none">
+              SOLD OUT
             </span>
           ) : (
             <button
               onClick={handleAdd}
               disabled={isMaxedOut}
-              className={`p-2.5 rounded-xl cursor-pointer transition-all duration-300 flex items-center justify-center ${
+              className={`p-2 rounded cursor-pointer transition-colors flex items-center justify-center border border-primary-dark/10 ${
                 isMaxedOut 
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  : 'bg-teal-400 hover:bg-teal-300 text-slate-950 hover:shadow-lg hover:shadow-teal-500/10'
+                  ? 'bg-paper text-ink/30 cursor-not-allowed'
+                  : 'bg-accent hover:bg-accent/90 text-white shadow-sm'
               }`}
               title={isMaxedOut ? 'Max stock reached in cart' : 'Add to Cart'}
             >
-              {isMaxedOut ? <Check className="h-5 w-5" /> : <ShoppingCart className="h-5 w-5" />}
+              {isMaxedOut ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
             </button>
           )}
         </div>

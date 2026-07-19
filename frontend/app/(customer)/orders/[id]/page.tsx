@@ -141,7 +141,7 @@ export default function OrderDetailPage() {
   const currentStepIndex = order ? getProgressStepIndex(order.status) : 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col min-h-screen bg-paper text-ink font-sans">
       <CustomerNavigation />
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
@@ -150,49 +150,49 @@ export default function OrderDetailPage() {
         <div className="flex items-center justify-between">
           <Link
             href="/orders"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-slate-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-ink/60 hover:text-accent transition-colors uppercase tracking-wider"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Orders
           </Link>
-          <span className="text-xxs text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
-            <span className="h-2 w-2 rounded-full bg-teal-500" />
-            Live Status Polling Enabled
+          <span className="text-[10px] font-mono text-ink/50 flex items-center gap-1.5 animate-pulse">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+            LIVE POLLING ENABLED
           </span>
         </div>
 
         {loading ? (
-          <div className="h-96 bg-slate-900/30 rounded-3xl animate-pulse" />
+          <div className="h-96 bg-white border border-primary-dark/10 rounded animate-pulse" />
         ) : error || !order ? (
-          <div className="p-12 rounded-3xl bg-slate-900/40 border border-slate-800/85 text-center space-y-4">
-            <AlertTriangle className="h-10 w-10 text-rose-400 mx-auto" />
-            <h3 className="text-xl font-bold text-white">Order Details Unavailable</h3>
-            <p className="text-sm text-slate-400 max-w-sm mx-auto">
+          <div className="p-12 rounded bg-white border border-primary-dark/15 text-center space-y-4 shadow-xxs">
+            <AlertTriangle className="h-8 w-8 text-rose-600 mx-auto" />
+            <h3 className="text-xl font-bold font-serif text-primary-dark">Order Details Unavailable</h3>
+            <p className="text-xs text-ink/65 max-w-sm mx-auto">
               We couldn't retrieve information for this order. It may not belong to this account, or the backend database is offline.
             </p>
           </div>
         ) : (
           <div className="space-y-8">
             {/* Header stats summary card */}
-            <div className="p-8 rounded-3xl bg-slate-900/20 border border-slate-900 backdrop-blur-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="p-8 rounded bg-white border border-primary-dark/15 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xxs">
               <div className="space-y-1">
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">
+                <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block">
                   Reference #OR-{order.id}
                 </span>
-                <h1 className="text-2xl font-black text-white">
+                <h1 className="text-2xl font-bold font-serif text-primary-dark">
                   {getStatusLabel(order.status)}
                 </h1>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-ink/60 font-mono">
                   Placed on {new Date(order.created_at).toLocaleString()}
                 </p>
               </div>
 
               <div className="flex items-center gap-6">
                 <div>
-                  <span className="text-xxs text-slate-500 font-bold uppercase tracking-wider block text-left md:text-right">
+                  <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block text-left md:text-right">
                     Total Amount
                   </span>
-                  <span className="text-2xl font-black text-teal-400">
+                  <span className="text-2xl font-mono font-bold text-accent">
                     ₹{Number(order.total_amount).toFixed(2)}
                   </span>
                 </div>
@@ -201,28 +201,28 @@ export default function OrderDetailPage() {
 
             {/* Rejection Banner */}
             {order.status === 'cancelled' && order.prescriptions.some((p) => p.rejection_reason) && (
-              <div className="p-6 rounded-3xl bg-rose-500/10 border border-rose-500/20 text-rose-400 space-y-2">
-                <h3 className="font-bold flex items-center gap-2">
+              <div className="p-6 rounded bg-rose-50 border border-rose-200 text-rose-600 space-y-2 shadow-xxs">
+                <h3 className="font-serif font-bold text-rose-700 flex items-center gap-2 text-sm uppercase tracking-wider">
                   <AlertTriangle className="h-5 w-5" />
                   Prescription Rejected by Pharmacist
                 </h3>
-                <p className="text-sm leading-relaxed text-slate-300">
-                  <span className="font-bold text-rose-400">Reason:</span>{' '}
+                <p className="text-xs leading-relaxed text-ink/80 font-sans">
+                  <span className="font-bold text-rose-600 uppercase font-mono">Reason:</span>{' '}
                   {order.prescriptions.find((p) => p.rejection_reason)?.rejection_reason}
                 </p>
-                <p className="text-xs text-slate-500">
-                  Your order has been cancelled automatically. Please place a new order with a valid prescription.
+                <p className="text-[10px] text-ink/50 font-mono">
+                  Your order has been cancelled automatically. Please place a new order with a valid prescription document.
                 </p>
               </div>
             )}
 
             {/* Waiting for approval banner */}
             {order.status === 'rx_pending' && (
-              <div className="p-6 rounded-3xl bg-violet-500/10 border border-violet-500/20 text-violet-400 flex items-start gap-4">
-                <Clock className="h-6 w-6 flex-shrink-0 mt-0.5" />
+              <div className="p-6 rounded bg-white border border-primary-dark/15 text-primary-dark flex items-start gap-4 shadow-xxs">
+                <Clock className="h-5 w-5 flex-shrink-0 mt-0.5 text-accent" />
                 <div className="space-y-1">
-                  <h3 className="font-bold">Awaiting Pharmacist Verification</h3>
-                  <p className="text-xs text-slate-350 leading-relaxed">
+                  <h3 className="font-serif font-bold text-sm">Awaiting Pharmacist Verification</h3>
+                  <p className="text-xs text-ink/75 leading-relaxed font-sans">
                     Your prescription has been uploaded and queued. On-duty pharmacists verify uploaded files manually against local regulations. The screen will automatically refresh once approved!
                   </p>
                 </div>
@@ -231,17 +231,17 @@ export default function OrderDetailPage() {
 
             {/* Retry Payment Option */}
             {order.status === 'pending' && order.payment_method === 'online' && order.payment_status === 'unpaid' && (
-              <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="p-6 rounded bg-white border border-primary-dark/15 text-primary-dark flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xxs">
                 <div className="space-y-1">
-                  <h3 className="font-bold">Online Payment Pending</h3>
-                  <p className="text-xs text-slate-350 leading-relaxed">
+                  <h3 className="font-serif font-bold text-sm">Online Payment Pending</h3>
+                  <p className="text-xs text-ink/70 leading-relaxed font-sans">
                     The online transaction wasn't finalized. Click pay now to complete the Razorpay payment.
                   </p>
                 </div>
                 <button
                   onClick={handleRetryPayment}
                   disabled={retryPaying}
-                  className="py-3 px-6 bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold text-sm rounded-2xl flex-shrink-0 cursor-pointer shadow-lg shadow-teal-500/20"
+                  className="py-2.5 px-5 bg-accent hover:bg-accent/90 text-white font-sans font-bold text-xs rounded flex-shrink-0 cursor-pointer shadow-sm border border-transparent"
                 >
                   {retryPaying ? 'Processing...' : 'Pay with Razorpay'}
                 </button>
@@ -250,8 +250,8 @@ export default function OrderDetailPage() {
 
             {/* Progress tracker timeline */}
             {order.status !== 'cancelled' && (
-              <div className="bg-slate-900/30 border border-slate-900 rounded-3xl p-8 backdrop-blur-xl">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">
+              <div className="bg-white border border-primary-dark/15 rounded-lg p-6 sm:p-8 shadow-xxs">
+                <h3 className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest mb-6">
                   Delivery Tracking Timeline
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-6 gap-6 relative">
@@ -260,23 +260,23 @@ export default function OrderDetailPage() {
                     const isActive = currentStepIndex === index;
 
                     return (
-                      <div key={index} className="flex flex-col items-center text-center space-y-2.5 relative">
+                      <div key={index} className="flex flex-col items-center text-center space-y-2 relative">
                         {/* Dot */}
                         <div
-                          className={`h-8 w-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                          className={`h-7 w-7 rounded-full border flex items-center justify-center transition-all ${
                             isCompleted
-                              ? 'bg-teal-400/10 border-teal-400 text-teal-400 font-extrabold'
-                              : 'bg-slate-950/40 border-slate-800 text-slate-650'
-                          } ${isActive ? 'ring-4 ring-teal-500/20 animate-pulse' : ''}`}
+                              ? 'bg-accent/10 border-accent text-accent font-mono font-bold text-xs'
+                              : 'bg-paper border-primary-dark/15 text-ink/30 text-xs'
+                          } ${isActive ? 'ring-4 ring-accent/15 animate-pulse' : ''}`}
                         >
-                          {isCompleted ? <CheckCircle2 className="h-4.5 w-4.5" /> : index + 1}
+                          {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
                         </div>
                         {/* Text */}
                         <div className="space-y-0.5">
-                          <span className={`text-xs font-bold block ${isCompleted ? 'text-white' : 'text-slate-500'}`}>
+                          <span className={`text-[11px] font-bold block ${isCompleted ? 'text-primary-dark' : 'text-ink/40'}`}>
                             {step.label}
                           </span>
-                          <span className="text-[10px] text-slate-650 block leading-tight">
+                          <span className="text-[9px] text-ink/50 block leading-tight font-mono">
                             {step.desc}
                           </span>
                         </div>
@@ -291,28 +291,28 @@ export default function OrderDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Order items list (Left 2 cols) */}
               <div className="md:col-span-2 space-y-4">
-                <div className="bg-slate-900/10 border border-slate-900 rounded-3xl p-6 space-y-4">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <Package className="h-4.5 w-4.5 text-teal-400" />
+                <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
+                  <h3 className="text-xs font-mono font-bold text-accent uppercase tracking-wider mb-2 flex items-center gap-2 border-b border-primary-dark/10 pb-3">
+                    <Package className="h-4 w-4 text-accent" />
                     Medicines & Items
                   </h3>
 
                   <div className="space-y-4">
                     {order.items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center py-2.5 border-b border-slate-900/50 last:border-0">
+                      <div key={item.id} className="flex justify-between items-center py-2.5 border-b border-primary-dark/10 last:border-0">
                         <div className="space-y-1">
-                          <span className="text-sm font-bold text-slate-200 block">
+                          <span className="text-sm font-serif font-bold text-primary-dark block leading-tight">
                             {item.product_name}
                           </span>
-                          <span className="text-xs text-slate-500">
-                            Unit Price: ₹{Number(item.price_at_order).toFixed(2)}
+                          <span className="text-[10px] font-mono text-ink/55 block">
+                            UNIT PRICE: ₹{Number(item.price_at_order).toFixed(2)}
                           </span>
                         </div>
-                        <div className="flex gap-10 items-center">
-                          <span className="text-xs font-medium text-slate-450">
-                            Qty: {item.quantity}
+                        <div className="flex gap-8 items-center">
+                          <span className="text-[10px] font-mono text-ink/50">
+                            QTY: {item.quantity}
                           </span>
-                          <span className="text-sm font-extrabold text-slate-200">
+                          <span className="text-sm font-mono font-bold text-primary-dark">
                             ₹{(Number(item.price_at_order) * item.quantity).toFixed(2)}
                           </span>
                         </div>
@@ -320,36 +320,36 @@ export default function OrderDetailPage() {
                     ))}
 
                     {/* Receipts Summary */}
-                    <div className="pt-4 border-t border-slate-900 space-y-2 text-xs font-semibold text-slate-450">
+                    <div className="pt-4 border-t border-primary-dark/10 space-y-2 text-xs font-sans text-ink/75">
                       <div className="flex justify-between">
                         <span>Items Subtotal</span>
-                        <span className="text-slate-200">
+                        <span className="font-mono text-primary-dark">
                           ₹{(Number(order.total_amount) + Number(order.discount_amount || 0)).toFixed(2)}
                         </span>
                       </div>
                       {Number(order.discount_amount) > 0 && (
                         <div className="space-y-2">
                           {order.points_redeemed > 0 && (
-                            <div className="flex justify-between text-emerald-400 font-bold">
+                            <div className="flex justify-between text-accent font-bold">
                               <span>Points Redeemed ({order.points_redeemed} pts)</span>
-                              <span>-₹{(order.points_redeemed / 10).toFixed(2)}</span>
+                              <span className="font-mono">-₹{(order.points_redeemed / 10).toFixed(2)}</span>
                             </div>
                           )}
                           {Number(order.discount_amount) - (order.points_redeemed / 10) > 0 && (
-                            <div className="flex justify-between text-emerald-400 font-bold">
+                            <div className="flex justify-between text-accent font-bold">
                               <span>Coupon Discount</span>
-                              <span>-₹{(Number(order.discount_amount) - (order.points_redeemed / 10)).toFixed(2)}</span>
+                              <span className="font-mono">-₹{(Number(order.discount_amount) - (order.points_redeemed / 10)).toFixed(2)}</span>
                             </div>
                           )}
                         </div>
                       )}
-                      <div className="flex justify-between text-sm font-bold text-teal-400 pt-2 border-t border-slate-900/50">
+                      <div className="flex justify-between text-sm font-bold text-accent pt-2 border-t border-primary-dark/10">
                         <span>Total Paid</span>
-                        <span>₹{Number(order.total_amount).toFixed(2)}</span>
+                        <span className="font-mono text-lg">₹{Number(order.total_amount).toFixed(2)}</span>
                       </div>
                       {order.points_earned > 0 && (
-                        <p className="text-[10px] text-slate-500 pt-1 text-right">
-                          Estimated points from this order: {order.points_earned} pts
+                        <p className="text-[10px] text-ink/40 pt-1 text-right font-mono">
+                          Estimated points earned: {order.points_earned} pts
                         </p>
                       )}
                     </div>
@@ -360,27 +360,27 @@ export default function OrderDetailPage() {
               {/* Delivery info & Prescriptions (Right col) */}
               <div className="space-y-6">
                 {/* Fulfillment Destination Card */}
-                <div className="bg-slate-900/10 border border-slate-900 rounded-3xl p-6 space-y-4">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <MapPin className="h-4.5 w-4.5 text-teal-400" />
+                <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
+                  <h3 className="text-xs font-mono font-bold text-accent uppercase tracking-wider flex items-center gap-2 border-b border-primary-dark/10 pb-3">
+                    <MapPin className="h-4 w-4 text-accent" />
                     Fulfillment
                   </h3>
 
                   {order.delivery_type === 'delivery' ? (
                     <div className="space-y-2 text-xs">
-                      <span className="px-2 py-0.5 bg-teal-500/10 text-teal-400 font-bold border border-teal-500/20 rounded uppercase text-[10px]">
+                      <span className="px-2 py-0.5 bg-accent/10 text-accent font-mono font-bold border border-accent/20 rounded uppercase text-[10px]">
                         Home Delivery
                       </span>
-                      <p className="text-slate-300 font-semibold leading-relaxed">
-                        Address details are fetched on creation. Delivery starts once confirmed.
+                      <p className="text-ink/70 font-medium leading-relaxed font-sans">
+                        Order will be dispatched to your delivery address once confirmed.
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-2 text-xs">
-                      <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20 rounded uppercase text-[10px]">
+                      <span className="px-2 py-0.5 bg-highlight/15 text-primary-dark font-mono font-bold border border-highlight/25 rounded uppercase text-[10px]">
                         Store Pickup
                       </span>
-                      <p className="text-slate-350 leading-relaxed font-semibold">
+                      <p className="text-ink/75 leading-relaxed font-medium font-sans">
                         Pick up your medicines at the counter. Present your Order ID #{order.id} to the pharmacist.
                       </p>
                     </div>
@@ -389,22 +389,22 @@ export default function OrderDetailPage() {
 
                 {/* Prescription Attachment Card */}
                 {order.requires_rx_check && (
-                  <div className="bg-slate-900/10 border border-slate-900 rounded-3xl p-6 space-y-4">
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      <FileText className="h-4.5 w-4.5 text-teal-400" />
+                  <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
+                    <h3 className="text-xs font-mono font-bold text-accent uppercase tracking-wider flex items-center gap-2 border-b border-primary-dark/10 pb-3">
+                      <FileText className="h-4 w-4 text-accent" />
                       Prescription File
                     </h3>
 
                     {order.prescriptions.map((pres) => (
-                      <div key={pres.id} className="p-3 bg-slate-950/40 border border-slate-900 rounded-xl space-y-2 text-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-400 font-bold truncate max-w-[70%]">
+                      <div key={pres.id} className="p-3 bg-paper/40 border border-primary-dark/10 rounded space-y-2 text-xs font-mono">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-ink/60 font-bold truncate max-w-[60%]">
                             {pres.file_url.split('/').pop()}
                           </span>
-                          <span className={`text-[10px] px-2 py-0.5 rounded font-black border ${
+                          <span className={`text-[9px] px-2 py-0.5 rounded font-bold border uppercase tracking-wider ${
                             pres.verified 
-                              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                              : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                              ? 'bg-accent/10 border-accent/20 text-accent'
+                              : 'bg-highlight/10 border-highlight/20 text-primary-dark'
                           }`}>
                             {pres.verified ? 'Approved' : 'Pending'}
                           </span>
@@ -413,7 +413,7 @@ export default function OrderDetailPage() {
                           href={`${process.env.NEXT_PUBLIC_API_URL}${pres.file_url}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[10px] font-bold text-teal-400 hover:text-teal-350 block hover:underline"
+                          className="text-[10px] font-bold text-accent hover:text-accent/80 block hover:underline"
                         >
                           View Uploaded Document
                         </a>

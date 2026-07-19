@@ -35,54 +35,54 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
   const availableStock = product.stock_qty - qtyInCart;
 
   return (
-    <div className="space-y-6 pt-4 border-t border-slate-900">
+    <div className="space-y-6 pt-4 border-t border-primary-dark/10">
       {isOutOfStock ? (
-        <div className="p-4 bg-slate-900 border border-slate-800 text-slate-500 rounded-2xl font-bold text-center">
+        <div className="p-4 bg-paper/40 border border-primary-dark/10 text-ink/45 rounded font-mono text-center text-xs uppercase tracking-wider">
           Temporarily Out of Stock
         </div>
       ) : isMaxedOut ? (
-        <div className="p-4 bg-teal-500/10 border border-teal-500/20 text-teal-400 rounded-2xl font-bold text-center">
+        <div className="p-4 bg-accent/10 border border-accent/15 text-accent rounded font-sans font-bold text-center text-xs">
           All Available Units Added to Cart
         </div>
       ) : (
         <div className="space-y-4">
           {/* Quantity Selector */}
           <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-              Quantity
+            <span className="text-xs font-mono font-bold text-accent uppercase tracking-wider">
+              QUANTITY
             </span>
-            <div className="flex items-center border border-slate-800 rounded-2xl bg-slate-950/40 p-1">
+            <div className="flex items-center border border-primary-dark/15 rounded bg-paper/30 p-0.5">
               <button
                 type="button"
                 onClick={handleDecrement}
                 disabled={quantity <= 1}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                className="p-1.5 rounded text-ink/70 hover:text-primary-dark hover:bg-paper/85 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-3.5 w-3.5" />
               </button>
-              <span className="px-5 font-bold text-white text-base select-none">
+              <span className="px-4 font-mono font-bold text-primary-dark text-base select-none">
                 {quantity}
               </span>
               <button
                 type="button"
                 onClick={handleIncrement}
                 disabled={quantity >= availableStock}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                className="p-1.5 rounded text-ink/70 hover:text-primary-dark hover:bg-paper/85 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
-            <span className="text-xs text-slate-500 font-medium">
-              ({product.stock_qty} available in stock)
+            <span className="text-[10px] font-mono text-ink/45">
+              ({product.stock_qty} IN STOCK)
             </span>
           </div>
 
           {/* Add to Cart button */}
           <button
             onClick={handleAdd}
-            className="w-full flex items-center justify-center gap-2 py-4 px-6 border border-transparent rounded-2xl text-sm font-extrabold text-slate-950 bg-teal-400 hover:bg-teal-300 transition-all duration-300 shadow-lg shadow-teal-500/20 cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-3 px-6 border border-transparent rounded text-sm font-sans font-bold text-white bg-accent hover:bg-accent/90 transition-colors shadow-sm cursor-pointer"
           >
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCart className="h-4.5 w-4.5" />
             Add to Cart (₹{(Number(product.price) * quantity).toFixed(2)})
           </button>
         </div>
