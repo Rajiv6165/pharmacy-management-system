@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { Order } from '@/lib/types';
 import CustomerNavigation from '@/components/customer/Navigation';
-import { ShoppingBag, Calendar, CreditCard, ChevronRight, Activity, Clock } from 'lucide-react';
+import { ShoppingBag, Calendar, CreditCard, ChevronRight, Activity, Clock, CheckCircle2, Package, XCircle, FileText } from 'lucide-react';
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -29,11 +29,11 @@ export default function OrderHistoryPage() {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       pending: 'bg-highlight/10 border-highlight/30 text-primary-dark',
-      rx_pending: 'bg-highlight/20 border-highlight/40 text-primary-dark',
+      rx_pending: 'bg-highlight/15 border-highlight/40 text-primary-dark',
       confirmed: 'bg-accent/10 border-accent/20 text-accent',
       preparing: 'bg-accent/15 border-accent/25 text-accent',
       out_for_delivery: 'bg-accent/15 border-accent/25 text-accent',
-      ready_for_pickup: 'bg-accent/15 border-accent/25 text-accent',
+      ready_for_pickup: 'bg-accent/10 border-accent/20 text-accent',
       completed: 'bg-accent/10 border-accent/20 text-accent',
       cancelled: 'bg-rose-50 border-rose-200 text-rose-600',
     };
@@ -49,9 +49,19 @@ export default function OrderHistoryPage() {
       cancelled: 'Cancelled',
     };
 
+    // Contextual icon per status family
+    const getIcon = (s: string) => {
+      if (s === 'cancelled') return <XCircle className="h-3 w-3" />;
+      if (s === 'completed') return <CheckCircle2 className="h-3 w-3" />;
+      if (s === 'confirmed') return <CheckCircle2 className="h-3 w-3" />;
+      if (s === 'rx_pending') return <FileText className="h-3 w-3" />;
+      if (s === 'preparing' || s === 'out_for_delivery' || s === 'ready_for_pickup') return <Package className="h-3 w-3" />;
+      return <Clock className="h-3 w-3" />;
+    };
+
     return (
       <span className={`inline-flex items-center gap-1 border px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${styles[status] || 'bg-paper text-ink/40 border-primary-dark/10'}`}>
-        <Clock className="h-3 w-3" />
+        {getIcon(status)}
         {labels[status] || status}
       </span>
     );
@@ -62,15 +72,32 @@ export default function OrderHistoryPage() {
       <CustomerNavigation />
 
       <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight">Order History</h1>
-          <p className="mt-1 text-xs text-ink/70">
-            Monitor active order tracking states and review your past orders.
-          </p>
+        {/* Page header with ledger styling */}
+        <div className="border-b border-primary-dark/10 pb-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Package className="h-4 w-4 text-accent" />
+                <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest">
+                  ORDER LEDGER
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight">Order History</h1>
+              <p className="mt-1.5 text-xs text-ink/65 font-sans">
+                Monitor active order tracking states and review your past orders.
+              </p>
+            </div>
+            {orders.length > 0 && (
+              <div className="flex-shrink-0 text-right">
+                <span className="text-[10px] font-mono font-bold text-ink/40 uppercase tracking-wider block">Orders</span>
+                <span className="text-2xl font-mono font-bold text-primary-dark">{orders.length}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {error && (
-          <div className="p-4 bg-rose-55 border border-rose-200 text-rose-600 text-xs rounded font-mono uppercase tracking-wider">
+          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded font-mono uppercase tracking-wider">
             {error}
           </div>
         )}

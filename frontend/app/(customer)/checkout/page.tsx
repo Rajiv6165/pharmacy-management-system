@@ -228,7 +228,7 @@ export default function CheckoutPage() {
           },
         },
         theme: {
-          color: '#14b8a6', // Teal 500
+          color: '#3A7563', // Brand accent sage green
         },
       };
 
@@ -245,11 +245,33 @@ export default function CheckoutPage() {
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
       <main className="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+        {/* Checkout header banner */}
+        <div className="border-b border-primary-dark/10 pb-5 mb-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <CreditCard className="h-4 w-4 text-accent" />
+                <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest">
+                  SECURE CHECKOUT
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight">Checkout</h1>
+              <p className="mt-1.5 text-xs text-ink/65 font-sans">
+                Complete your delivery details and confirm payment to place the order.
+              </p>
+            </div>
+            <div className="flex-shrink-0 text-right">
+              <span className="text-[10px] font-mono font-bold text-ink/40 uppercase tracking-wider block">Items</span>
+              <span className="text-2xl font-mono font-bold text-primary-dark">
+                {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+              </span>
+            </div>
+          </div>
+        </div>
         <form onSubmit={handleOrderSubmission} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
           {/* Checkout Steps (Left) */}
           <div className="lg:col-span-2 space-y-6">
-            <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight">Checkout</h1>
 
             {error && (
               <div className="p-4 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded font-mono uppercase tracking-wider">
@@ -470,16 +492,22 @@ export default function CheckoutPage() {
 
             {/* Step 5: Prescription File Upload */}
             {requiresRx && (
-              <div className="bg-white border border-primary-dark/15 rounded-lg p-6 space-y-4 shadow-xxs">
-                <h3 className="text-base font-serif font-bold text-primary-dark flex items-center gap-2">
-                  <FileText className="h-4.5 w-4.5 text-accent" />
-                  {deliveryType === 'delivery' ? '5.' : '4.'} Upload Doctor Prescription
-                </h3>
+              <div className="bg-white border border-highlight/40 rounded-lg p-6 space-y-4 shadow-xxs">
+                {/* Rx required header with mustard accent */}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-serif font-bold text-primary-dark flex items-center gap-2">
+                    <FileText className="h-4.5 w-4.5 text-highlight" />
+                    {deliveryType === 'delivery' ? '5.' : '4.'} Upload Doctor Prescription
+                  </h3>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold text-primary-dark bg-highlight border border-primary-dark/10 uppercase tracking-wider">
+                    Rx Required
+                  </span>
+                </div>
                 <p className="text-xs text-ink/65 leading-relaxed font-sans">
                   Your order contains regulated medications that require medical validation. Upload a clear photograph or digital PDF of your doctor prescription.
                 </p>
 
-                <div className="relative border border-dashed border-primary-dark/25 rounded bg-paper/20 p-6 flex flex-col items-center justify-center text-center hover:border-accent/40 transition-colors">
+                <div className="relative border-2 border-dashed border-highlight/40 rounded bg-highlight/5 p-6 flex flex-col items-center justify-center text-center hover:border-highlight/60 transition-colors">
                   <input
                     type="file"
                     required
@@ -487,15 +515,15 @@ export default function CheckoutPage() {
                     onChange={handleFileChange}
                     className="absolute inset-0 opacity-0 cursor-pointer z-20"
                   />
-                  <div className="p-3 bg-accent/10 rounded-full text-accent mb-3 border border-accent/20">
+                  <div className="p-3 bg-highlight/10 rounded-full text-highlight mb-3 border border-highlight/20">
                     <Upload className="h-6 w-6" />
                   </div>
                   {rxFile ? (
                     <div className="space-y-1">
-                      <span className="text-xs font-mono font-bold text-ink block">
-                        Selected File:
+                      <span className="text-xs font-mono font-bold text-accent block">
+                        ✓ FILE SELECTED
                       </span>
-                      <span className="text-xs text-accent font-mono font-bold break-all">
+                      <span className="text-xs text-ink font-mono font-bold break-all">
                         {rxFile.name}
                       </span>
                       <span className="text-[10px] text-ink/40 block font-mono">
@@ -508,7 +536,7 @@ export default function CheckoutPage() {
                         Click to select or drag PDF / Image
                       </span>
                       <span className="text-[10px] text-ink/40 block mt-1 font-mono">
-                        Max file size: 5MB
+                        Accepted: .pdf, .jpg, .png · Max 5MB
                       </span>
                     </div>
                   )}
@@ -592,7 +620,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full flex items-center justify-center gap-2 py-3 border border-transparent rounded text-sm font-sans font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors shadow-sm"
+                className="w-full flex items-center justify-center gap-2 py-4 border-2 border-accent rounded text-base font-sans font-bold text-white bg-accent hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors shadow-md"
               >
                 {submitting ? 'Placing Order...' : 'Pay & Confirm Order'}
               </button>

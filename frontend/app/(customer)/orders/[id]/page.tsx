@@ -9,7 +9,7 @@ import { Order } from '@/lib/types';
 import CustomerNavigation from '@/components/customer/Navigation';
 import { 
   Package, Calendar, MapPin, CreditCard, ChevronLeft, 
-  FileText, Clock, AlertTriangle, CheckCircle2, RotateCcw 
+  FileText, Clock, AlertTriangle, CheckCircle2, RotateCcw, Activity
 } from 'lucide-react';
 
 export default function OrderDetailPage() {
@@ -87,7 +87,7 @@ export default function OrderDetailPage() {
           },
         },
         theme: {
-          color: '#14b8a6', // Teal 500
+          color: '#3A7563', // Brand accent sage green
         },
       };
 
@@ -192,7 +192,7 @@ export default function OrderDetailPage() {
                   <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-wider block text-left md:text-right">
                     Total Amount
                   </span>
-                  <span className="text-2xl font-mono font-bold text-accent">
+                  <span className="text-2xl font-mono font-bold text-primary-dark">
                     ₹{Number(order.total_amount).toFixed(2)}
                   </span>
                 </div>
@@ -426,6 +426,14 @@ export default function OrderDetailPage() {
           </div>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-primary-dark/10 bg-primary-dark py-8 mt-12 text-paper/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs flex items-center justify-center gap-2">
+          <Activity className="h-4 w-4 text-highlight" />
+          <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Order Tracking · 2026</span>
+        </div>
+      </footer>
     </div>
   );
 }

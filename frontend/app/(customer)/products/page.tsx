@@ -4,7 +4,7 @@ import { Category, Product } from '@/lib/types';
 import CustomerNavigation from '@/components/customer/Navigation';
 import ProductCard from '@/components/customer/ProductCard';
 import CatalogFilters from '@/components/customer/CatalogFilters';
-import { Activity, ShoppingBag } from 'lucide-react';
+import { Activity, ShoppingBag, BookOpen } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,13 +49,48 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <CustomerNavigation />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold font-serif tracking-tight text-primary-dark sm:text-4xl">
-            Medicines & Catalog
-          </h1>
-          <p className="mt-1 text-xs text-ink/70">
-            Browse our verified inventory of prescription drugs and general healthcare products.
-          </p>
+        {/* Page header with catalog ledger styling */}
+        <div className="border-b border-primary-dark/10 pb-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <BookOpen className="h-4 w-4 text-accent" />
+                <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest">
+                  PHARMACY CATALOGUE
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold font-serif tracking-tight text-primary-dark sm:text-4xl">
+                Medicines &amp; Catalog
+              </h1>
+              <p className="mt-1.5 text-xs text-ink/65 font-sans">
+                Browse our verified inventory of prescription drugs and general healthcare products.
+              </p>
+            </div>
+            {!isBackendOffline && (
+              <div className="flex-shrink-0 text-right">
+                <span className="text-[10px] font-mono font-bold text-ink/40 uppercase tracking-wider block">Results</span>
+                <span className="text-2xl font-mono font-bold text-primary-dark">{products.length}</span>
+                {(search || categoryId || inStock) && (
+                  <span className="text-[10px] font-mono text-accent block mt-0.5">FILTERED</span>
+                )}
+              </div>
+            )}
+          </div>
+          {/* Active filters summary */}
+          {(search || categoryId || inStock) && !isBackendOffline && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {search && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-accent/10 border border-accent/20 text-[10px] font-mono font-bold text-accent">
+                  SEARCH: &quot;{search}&quot;
+                </span>
+              )}
+              {inStock && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-accent/10 border border-accent/20 text-[10px] font-mono font-bold text-accent">
+                  IN STOCK ONLY
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {isBackendOffline ? (

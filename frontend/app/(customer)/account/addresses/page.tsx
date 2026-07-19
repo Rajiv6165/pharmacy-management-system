@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
 import { Address } from '@/lib/types';
 import CustomerNavigation from '@/components/customer/Navigation';
-import { MapPin, Plus, Edit2, Trash2, Home, Briefcase, Check, X, ShieldAlert } from 'lucide-react';
+import { MapPin, Plus, Edit2, Trash2, Home, Briefcase, Check, X, ShieldAlert, Activity } from 'lucide-react';
 
 export default function AddressManagementPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -106,22 +106,31 @@ export default function AddressManagementPage() {
       <CustomerNavigation />
 
       <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight">
-              My Addresses
-            </h1>
-            <p className="mt-1 text-xs text-ink/70">
-              Manage your billing and delivery destinations for quick checkout.
-            </p>
+        {/* Page header with ledger styling */}
+        <div className="border-b border-primary-dark/10 pb-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <MapPin className="h-4 w-4 text-accent" />
+                <span className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest">
+                  DELIVERY PROFILE
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold font-serif text-primary-dark tracking-tight">
+                My Addresses
+              </h1>
+              <p className="mt-1.5 text-xs text-ink/65 font-sans">
+                Manage your billing and delivery destinations for quick checkout.
+              </p>
+            </div>
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-1.5 py-2.5 px-4 bg-accent hover:bg-accent/90 text-white rounded text-xs font-bold transition-all shadow-sm flex-shrink-0"
+            >
+              <Plus className="h-4 w-4" />
+              Add Address
+            </button>
           </div>
-          <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-1.5 py-2.5 px-4 bg-accent hover:bg-accent/90 text-white rounded text-xs font-bold transition-all shadow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            Add Address
-          </button>
         </div>
 
         {error && (
@@ -313,6 +322,14 @@ export default function AddressManagementPage() {
           </div>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-primary-dark/10 bg-primary-dark py-8 mt-12 text-paper/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs flex items-center justify-center gap-2">
+          <Activity className="h-4 w-4 text-highlight" />
+          <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Delivery Addresses · 2026</span>
+        </div>
+      </footer>
     </div>
   );
 }
