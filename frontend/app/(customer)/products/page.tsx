@@ -137,7 +137,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       <footer className="border-t border-primary-dark/10 bg-primary-dark py-8 pb-24 text-paper/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs flex items-center justify-center gap-2">
           <Activity className="h-4 w-4 text-highlight" />
-          <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Pharmacy Shop Catalogue · 2026</span>
+          <span>{process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Shop Catalogue · 2026</span>
         </div>
       </footer>
     </div>

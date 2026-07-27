@@ -199,7 +199,7 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: paymentOrder.amount * 100, // in paisa
         currency: paymentOrder.currency,
-        name: `${process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy'} Pharmacy`,
+        name: process.env.NEXT_PUBLIC_BRAND_NAME || 'Pharmacy',
         description: `Order Payment for #${orderId}`,
         order_id: paymentOrder.razorpay_order_id,
         handler: async function (response: any) {
@@ -223,7 +223,6 @@ export default function CheckoutPage() {
         modal: {
           ondismiss: function () {
             // Payment cancelled: Redirect to order detail page to retry
-            clearCart();
             router.push(`/orders/${orderId}`);
           },
         },
@@ -289,24 +288,34 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setDeliveryType('delivery')}
-                  className={`p-3.5 rounded border text-center font-bold text-xs cursor-pointer transition-colors uppercase tracking-wider ${
+                  className={`relative p-4 rounded-lg border-2 text-center font-bold text-xs cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 uppercase tracking-wider ${
                     deliveryType === 'delivery'
-                      ? 'bg-accent/10 border-accent/40 text-accent'
-                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
+                      ? 'bg-accent/10 border-accent text-accent ring-2 ring-accent/20 shadow-xs font-extrabold'
+                      : 'bg-white border-primary-dark/15 text-ink/70 hover:border-primary-dark/30 hover:bg-paper/30'
                   }`}
                 >
-                  Home Delivery
+                  {deliveryType === 'delivery' && (
+                    <span className="absolute top-2 right-2 flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4 text-accent" />
+                    </span>
+                  )}
+                  <span>Home Delivery</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setDeliveryType('pickup')}
-                  className={`p-3.5 rounded border text-center font-bold text-xs cursor-pointer transition-colors uppercase tracking-wider ${
+                  className={`relative p-4 rounded-lg border-2 text-center font-bold text-xs cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 uppercase tracking-wider ${
                     deliveryType === 'pickup'
-                      ? 'bg-accent/10 border-accent/40 text-accent'
-                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
+                      ? 'bg-accent/10 border-accent text-accent ring-2 ring-accent/20 shadow-xs font-extrabold'
+                      : 'bg-white border-primary-dark/15 text-ink/70 hover:border-primary-dark/30 hover:bg-paper/30'
                   }`}
                 >
-                  Store Pickup
+                  {deliveryType === 'pickup' && (
+                    <span className="absolute top-2 right-2 flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4 text-accent" />
+                    </span>
+                  )}
+                  <span>Store Pickup</span>
                 </button>
               </div>
             </div>
@@ -390,26 +399,36 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('cod')}
-                  className={`p-4 rounded border text-center font-bold text-xs cursor-pointer transition-colors flex flex-col items-center gap-2 uppercase tracking-wider ${
+                  className={`relative p-4 rounded-lg border-2 text-center font-bold text-xs cursor-pointer transition-all flex flex-col items-center justify-center gap-2 uppercase tracking-wider ${
                     paymentMethod === 'cod'
-                      ? 'bg-accent/10 border-accent/40 text-accent'
-                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
+                      ? 'bg-accent/10 border-accent text-accent ring-2 ring-accent/20 shadow-xs font-extrabold'
+                      : 'bg-white border-primary-dark/15 text-ink/70 hover:border-primary-dark/30 hover:bg-paper/30'
                   }`}
                 >
-                  <DollarSign className="h-4.5 w-4.5" />
-                  {deliveryType === 'delivery' ? 'Cash on Delivery' : 'Pay at Counter'}
+                  {paymentMethod === 'cod' && (
+                    <span className="absolute top-2 right-2 flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4 text-accent" />
+                    </span>
+                  )}
+                  <DollarSign className="h-5 w-5" />
+                  <span>{deliveryType === 'delivery' ? 'Cash on Delivery' : 'Pay at Counter'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('online')}
-                  className={`p-4 rounded border text-center font-bold text-xs cursor-pointer transition-colors flex flex-col items-center gap-2 uppercase tracking-wider ${
+                  className={`relative p-4 rounded-lg border-2 text-center font-bold text-xs cursor-pointer transition-all flex flex-col items-center justify-center gap-2 uppercase tracking-wider ${
                     paymentMethod === 'online'
-                      ? 'bg-accent/10 border-accent/40 text-accent'
-                      : 'bg-paper/30 border-primary-dark/15 text-ink/75 hover:bg-paper/50'
+                      ? 'bg-accent/10 border-accent text-accent ring-2 ring-accent/20 shadow-xs font-extrabold'
+                      : 'bg-white border-primary-dark/15 text-ink/70 hover:border-primary-dark/30 hover:bg-paper/30'
                   }`}
                 >
-                  <CreditCard className="h-4.5 w-4.5" />
-                  Pay Online
+                  {paymentMethod === 'online' && (
+                    <span className="absolute top-2 right-2 flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4 text-accent" />
+                    </span>
+                  )}
+                  <CreditCard className="h-5 w-5" />
+                  <span>Pay Online</span>
                 </button>
               </div>
             </div>
@@ -507,23 +526,23 @@ export default function CheckoutPage() {
                   Your order contains regulated medications that require medical validation. Upload a clear photograph or digital PDF of your doctor prescription.
                 </p>
 
-                <div className="relative border-2 border-dashed border-highlight/40 rounded bg-highlight/5 p-6 flex flex-col items-center justify-center text-center hover:border-highlight/60 transition-colors">
+                <div className="relative border-2 border-dashed border-highlight/50 rounded-lg bg-highlight/5 hover:border-highlight/70 transition-colors p-6 sm:p-8 flex flex-col items-center justify-center text-center min-h-[150px] w-full overflow-hidden">
                   <input
                     type="file"
                     required
                     accept="image/*,.pdf"
                     onChange={handleFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
                   />
                   <div className="p-3 bg-highlight/10 rounded-full text-highlight mb-3 border border-highlight/20">
                     <Upload className="h-6 w-6" />
                   </div>
                   {rxFile ? (
-                    <div className="space-y-1">
+                    <div className="space-y-1 max-w-full px-2">
                       <span className="text-xs font-mono font-bold text-accent block">
                         ✓ FILE SELECTED
                       </span>
-                      <span className="text-xs text-ink font-mono font-bold break-all">
+                      <span className="text-xs text-ink font-mono font-bold break-all block">
                         {rxFile.name}
                       </span>
                       <span className="text-[10px] text-ink/40 block font-mono">
@@ -531,11 +550,11 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                   ) : (
-                    <div>
+                    <div className="space-y-1 max-w-full px-2">
                       <span className="text-xs font-serif font-bold text-primary-dark block">
                         Click to select or drag PDF / Image
                       </span>
-                      <span className="text-[10px] text-ink/40 block mt-1 font-mono">
+                      <span className="text-[10px] text-ink/40 block font-mono mt-1">
                         Accepted: .pdf, .jpg, .png · Max 5MB
                       </span>
                     </div>
