@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, User, LogOut, Package, MapPin, Activity, Menu, X, KeyRound, Gift } from 'lucide-react';
+import NotificationsPanel from './NotificationsPanel';
 
 export default function CustomerNavigation() {
   const router = useRouter();
@@ -65,13 +66,15 @@ export default function CustomerNavigation() {
               )}
             </Link>
 
-            {/* Auth Dropdown */}
+            {/* Auth Dropdown & Notifications */}
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 p-2 rounded-xl text-paper/85 hover:text-white hover:bg-white/5 focus:outline-none transition-all duration-200 cursor-pointer"
-                >
+              <div className="flex items-center gap-4">
+                <NotificationsPanel />
+                <div className="relative">
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center gap-2 p-2 rounded-xl text-paper/85 hover:text-white hover:bg-white/5 focus:outline-none transition-all duration-200 cursor-pointer"
+                  >
                   <div className="h-7 w-7 rounded-full bg-paper/10 border border-paper/20 flex items-center justify-center text-paper font-sans font-bold text-xs uppercase">
                     {user.type === 'staff' ? 'S' : 'C'}
                   </div>
@@ -122,6 +125,7 @@ export default function CustomerNavigation() {
                     </button>
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-5">
@@ -152,6 +156,7 @@ export default function CustomerNavigation() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-4">
+            {user && <NotificationsPanel />}
             <Link href="/cart" className="relative p-2 text-paper/85 hover:text-white transition-colors">
               <ShoppingCart className="h-6 w-6" />
               {cartCount > 0 && (

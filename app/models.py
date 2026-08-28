@@ -205,3 +205,31 @@ class CouponUsage(Base):
     coupon = relationship("Coupon", back_populates="usages")
     customer = relationship("Customer", back_populates="coupon_usages")
     order = relationship("Order", back_populates="coupon_usages")
+
+
+class PushSubscription(Base):
+    __tablename__ = "push_subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id", ondelete="CASCADE"), nullable=False)
+    endpoint = Column(Text, nullable=False)
+    p256dh_key = Column(Text, nullable=False)
+    auth_key = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    customer = relationship("Customer")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id", ondelete="CASCADE"), nullable=False)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=True)
+    title = Column(String(150), nullable=False)
+    message = Column(String(500), nullable=False)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    customer = relationship("Customer")
+    order = relationship("Order")

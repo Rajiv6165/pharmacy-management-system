@@ -62,3 +62,50 @@ self.addEventListener("fetch", (event) => {
 function logger(...args) {
   console.log("[ServiceWorker]", ...args);
 }
+
+// Handle incoming push events
+self.addEventListener("push", (event) => {
+  logger("Push received");
+  if (!event.data) return;
+
+  try {
+    const data = event.data.json();
+    const title = data.title || "New Notification";
+    const options = {
+      body: data.body || "",
+      icon: data.icon || "/icon-192.png",
+      badge: "/icon-192.png",
+      data: {
+        url: data.url || "/",
+      },
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (err) {
+    logger("Error parsing push payload", err);
+  }
+});
+
+// Handle notification click
+self.addEventListener("notificationclick", (event) => {
+  logger("Notification clicked");
+  event.notification.close();
+
+  const urlToOpen = event.notification.data.url;
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      // Check if there is already a window/tab open with the target URL
+      for (let i = 0; i < windowClients.length; i++) {
+        const client = windowClients[i];
+        if (client.url.includes(urlToOpen) && "focus" in client) {
+          return client.focus();
+        }
+      }
+      // If no window is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});

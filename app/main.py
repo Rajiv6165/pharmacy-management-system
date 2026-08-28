@@ -93,6 +93,9 @@ app.include_router(admin_router)
 app.include_router(support_router)
 app.include_router(loyalty_router)
 
+from app.routers.notifications import router as notifications_router
+app.include_router(notifications_router)
+
 @app.get("/")
 def read_root():
     return {

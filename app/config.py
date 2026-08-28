@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     SMTP_FROM_EMAIL: Optional[str] = None
     ADMIN_EMAIL: Optional[str] = None
 
+    # VAPID keys for Web Push Notifications
+    VAPID_PRIVATE_KEY: Optional[str] = None
+    VAPID_PUBLIC_KEY: Optional[str] = None
+    VAPID_SUBJECT: str = "mailto:admin@example.com"
+
     # Notification Settings (Twilio SMS)
     TWILIO_ACCOUNT_SID: Optional[str] = None
     TWILIO_AUTH_TOKEN: Optional[str] = None
